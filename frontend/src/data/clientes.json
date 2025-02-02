@@ -1,0 +1,16 @@
+[
+    {
+        "id":1,
+        "nombre":"Agustin",
+        "dni":"41731091",
+        "clave":"41731091",
+        "rol":"ADMIN"
+    },
+    {
+        "id":2,
+        "nombre":"Agustin",
+        "dni":"41731092",
+        "clave":"41731092",
+        "rol":"USER"
+    }
+]
