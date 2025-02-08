@@ -10,22 +10,28 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Entity
 @Data
 @NoArgsConstructor
-@Entity
-public class Rutina {
+@AllArgsConstructor
+public class ClienteRutina {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String nombre;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
-    @OneToMany(mappedBy = "rutina", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RutinaDia> rutinaDias;
+    @ManyToOne
+    @JoinColumn(name = "rutina_id")
+    private Rutina rutina;
+
+    @OneToMany(mappedBy = "clienteRutina", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ClienteRutinaEjercicio> ejerciciosPersonalizados;
 }

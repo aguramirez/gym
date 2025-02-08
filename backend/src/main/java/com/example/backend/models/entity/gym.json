@@ -1,0 +1,159 @@
+[
+    {
+        "id": 1,
+        "nombre": "Agustin",
+        "dni": "12345678",
+        "telefono": "3881111111",
+        "rol": "admin",
+        "rutinas": [
+            {
+                "id": 1,
+                "nombre": "Fuerza hipertrofia adulto",
+                "rutinaDias": [
+                    {
+                        "id": 1,
+                        "nombre": "dia 1 pecho triceps",
+                        "clienteRutinaEjercicios": [
+                            {
+                                "id": 1,
+                                "notas": "32,5 kg each",
+                                "rutinaEjercicios": {
+                                    "id": 1,
+                                    "reps": 10,
+                                    "sets": 4,
+                                    "ejercicio": {
+                                        "id": 1,
+                                        "nombre": "press banca",
+                                        "video": "http://www.youtube.com"
+                                    }
+                                }
+                            },
+                            {
+                                "id": 2,
+                                "notas": "30 kg each",
+                                "rutinaEjercicios": {
+                                    "id": 2,
+                                    "reps": 10,
+                                    "sets": 4,
+                                    "ejercicio": {
+                                        "id": 2,
+                                        "nombre": "triceps polea",
+                                        "video": "http://www.youtube.com"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 2,
+                        "nombre": "dia 2 espalda biceps",
+                        "clienteRutinaEjercicios": [
+                            {
+                                "id": 3,
+                                "notas": "90 kg",
+                                "rutinaEjercicios": {
+                                    "id": 3,
+                                    "reps": 10,
+                                    "sets": 4,
+                                    "ejercicio": {
+                                        "id": 3,
+                                        "nombre": "dominadas",
+                                        "video": "http://www.youtube.com"
+                                    }
+                                }
+                            },
+                            {
+                                "id": 4,
+                                "notas": "17.5 each",
+                                "rutinaEjercicios": {
+                                    "id": 4,
+                                    "reps": 10,
+                                    "sets": 4,
+                                    "ejercicio": {
+                                        "id": 4,
+                                        "nombre": "biceps banco scott",
+                                        "video": "http://www.youtube.com"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "nombre": "cardio adulto",
+                "rutinaDias": [
+                    {
+                        "id": 3,
+                        "nombre": "dia 1 aire libre",
+                        "clienteRutinaEjercicios": [
+                            {
+                                "id": 5,
+                                "notas": "50",
+                                "rutinaEjercicios": {
+                                    "id": 5,
+                                    "reps": 50,
+                                    "sets": 4,
+                                    "ejercicio": {
+                                        "id": 5,
+                                        "nombre": "sentadilla peso corporal",
+                                        "video": "http://www.youtube.com"
+                                    }
+                                }
+                            },
+                            {
+                                "id": 6,
+                                "notas": "30 kg each",
+                                "rutinaEjercicios": {
+                                    "id": 6,
+                                    "reps": 10,
+                                    "sets": 4,
+                                    "ejercicio": {
+                                        "id": 6,
+                                        "nombre": "triceps polea",
+                                        "video": "http://www.youtube.com"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": 4,
+                        "nombre": "dia 2 espalda biceps",
+                        "clienteRutinaEjercicios": [
+                            {
+                                "id": 7,
+                                "notas": "90 kg",
+                                "rutinaEjercicios": {
+                                    "id": 7,
+                                    "reps": 10,
+                                    "sets": 4,
+                                    "ejercicio": {
+                                        "id": 7,
+                                        "nombre": "domllinadas",
+                                        "video": "http://www.youtube.com"
+                                    }
+                                }
+                            },
+                            {
+                                "id": 8,
+                                "notas": "17.5 each",
+                                "rutinaEjercicios": {
+                                    "id": 8,
+                                    "reps": 10,
+                                    "sets": 4,
+                                    "ejercicio": {
+                                        "id": 8,
+                                        "nombre": "bicelllps banco scott",
+                                        "video": "http://www.youtube.com"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
