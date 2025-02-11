@@ -16,10 +16,14 @@ public class RutinaEjercicio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private int reps;
+    private String reps;
     private int sets;
 
     @ManyToOne
     @JoinColumn(name = "ejercicio_id")
     private Ejercicio ejercicio;
+// this f shit
+    @ManyToOne
+    @JoinColumn(name = "rutina_dia_id")
+    private RutinaDia rutinaDia;
 }

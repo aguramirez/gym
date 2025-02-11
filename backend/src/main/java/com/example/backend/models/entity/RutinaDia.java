@@ -27,5 +27,5 @@ public class RutinaDia {
     private Rutina rutina;
 
     @OneToMany(mappedBy = "rutinaDia", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ClienteRutinaEjercicio> clienteRutinaEjercicios;
+    private List<RutinaEjercicio> rutinaEjercicios;
 }

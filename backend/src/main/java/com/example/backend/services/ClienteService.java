@@ -32,4 +32,19 @@ public class ClienteService {
     public List<Cliente> findByNombreOrDni(String nombre, String dni) {
         return clienteRepository.findByNombreContainingOrDniContaining(nombre, dni);
     }
+
+    public Cliente editarCliente(Long id, Cliente clienteActualizado) {
+        // Buscar el cliente existente por su ID
+        Cliente clienteExistente = clienteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+
+        // Actualizar los campos del cliente existente con los datos del cliente actualizado
+        clienteExistente.setNombre(clienteActualizado.getNombre());
+        clienteExistente.setDni(clienteActualizado.getDni());
+        clienteExistente.setTelefono(clienteActualizado.getTelefono());
+        clienteExistente.setRol(clienteActualizado.getRol());
+
+        // Guardar el cliente actualizado en la base de datos
+        return clienteRepository.save(clienteExistente);
+    }
 }

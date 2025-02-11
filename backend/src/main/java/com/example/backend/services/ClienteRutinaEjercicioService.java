@@ -28,4 +28,16 @@ public class ClienteRutinaEjercicioService {
     public void deleteById(Long id) {
         clienteRutinaEjercicioRepository.deleteById(id);
     }
+
+    public ClienteRutinaEjercicio editarNotasEjercicio(Long id, String notas) {
+        // Buscar el ejercicio personalizado por su ID
+        ClienteRutinaEjercicio ejercicioExistente = clienteRutinaEjercicioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ejercicio personalizado no encontrado"));
+
+        // Actualizar las notas del ejercicio
+        ejercicioExistente.setNotas(notas);
+
+        // Guardar el ejercicio actualizado en la base de datos
+        return clienteRutinaEjercicioRepository.save(ejercicioExistente);
+    }
 }

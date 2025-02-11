@@ -32,4 +32,17 @@ public class EjercicioService {
     public List<Ejercicio> findByNombre(String nombre) {
         return ejercicioRepository.findByNombreContaining(nombre);
     }
+
+    public Ejercicio editarEjercicio(Long id, Ejercicio ejercicioActualizado) {
+        // Buscar el ejercicio existente por su ID
+        Ejercicio ejercicioExistente = ejercicioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ejercicio no encontrado"));
+
+        // Actualizar los campos del ejercicio existente con los datos del ejercicio actualizado
+        ejercicioExistente.setNombre(ejercicioActualizado.getNombre());
+        ejercicioExistente.setVideo(ejercicioActualizado.getVideo());
+
+        // Guardar el ejercicio actualizado en la base de datos
+        return ejercicioRepository.save(ejercicioExistente);
+    }
 }

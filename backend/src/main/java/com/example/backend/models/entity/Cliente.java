@@ -24,5 +24,5 @@ public class Cliente {
     private String rol;
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Rutina> rutinas;
+    private List<ClienteRutina> clienteRutinas;
 }

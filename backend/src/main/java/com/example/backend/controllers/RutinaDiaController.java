@@ -7,42 +7,36 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.models.entity.Rutina;
-import com.example.backend.services.RutinaService;
+import com.example.backend.models.entity.RutinaDia;
+import com.example.backend.services.RutinaDiaService;
 
 @RestController
-@RequestMapping("/rutinas")
-public class RutinaController {
+@RequestMapping("/rutina-dias")
+public class RutinaDiaController {
     @Autowired
-    private RutinaService rutinaService;
+    private RutinaDiaService rutinaDiaService;
 
     @GetMapping
-    public List<Rutina> findAll() {
-        return rutinaService.findAll();
+    public List<RutinaDia> findAll() {
+        return rutinaDiaService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Rutina findById(@PathVariable Long id) {
-        return rutinaService.findById(id);
+    public RutinaDia findById(@PathVariable Long id) {
+        return rutinaDiaService.findById(id);
     }
 
     @PostMapping
-    public Rutina save(@RequestBody Rutina rutina) {
-        return rutinaService.save(rutina);
+    public RutinaDia save(@RequestBody RutinaDia rutinaDia) {
+        return rutinaDiaService.save(rutinaDia);
     }
 
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable Long id) {
-        rutinaService.deleteById(id);
-    }
-
-    @PutMapping("/{id}")
-    public Rutina editarRutina(@PathVariable Long id, @RequestBody Rutina rutinaActualizada) {
-        return rutinaService.editarRutina(id, rutinaActualizada);
+        rutinaDiaService.deleteById(id);
     }
 }

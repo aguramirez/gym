@@ -28,4 +28,16 @@ public class RutinaService {
     public void deleteById(Long id) {
         rutinaRepository.deleteById(id);
     }
+
+    public Rutina editarRutina(Long id, Rutina rutinaActualizada) {
+        // Buscar la rutina existente por su ID
+        Rutina rutinaExistente = rutinaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
+
+        // Actualizar los campos de la rutina existente con los datos de la rutina actualizada
+        rutinaExistente.setNombre(rutinaActualizada.getNombre());
+
+        // Guardar la rutina actualizada en la base de datos
+        return rutinaRepository.save(rutinaExistente);
+    }
 }

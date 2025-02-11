@@ -13,20 +13,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 public class ClienteRutinaEjercicio {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String notas;
 
     @ManyToOne
     @JoinColumn(name = "rutina_ejercicio_id")
-    private RutinaEjercicio rutinaEjercicios;
+    private RutinaEjercicio rutinaEjercicio;
 
     @ManyToOne
-    @JoinColumn(name = "rutina_dia_id")
-    private RutinaDia rutinaDia;
-
-    @ManyToOne
-    @JoinColumn(name = "cliente_rutina_id")
-    private ClienteRutina clienteRutina;
+    @JoinColumn(name = "cliente_rutina_dia_id")
+    private ClienteRutinaDia clienteRutinaDia;
 }
