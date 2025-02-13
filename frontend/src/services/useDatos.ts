@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { getClientes, getEjercicios, getRutinas } from './api'; // Importa tus funciones de API
 import { Cliente } from '../models/Cliente';
 import { Ejercicio } from '../models/Ejercicios';
+import { Rutina } from '../models/Rutina'
 
 const useDatos = () => {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [ejercicios, setEjercicios] = useState<Ejercicio[]>([]);
-  const [rutinas, setRutinas] = useState([]);
+  const [rutinas, setRutinas] = useState<Rutina[]>([]);
 
   // Obtener clientes al cargar el componente
   useEffect(() => {

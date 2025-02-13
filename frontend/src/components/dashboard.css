@@ -99,3 +99,11 @@ body, html {
     font-size: 20px;
     cursor: pointer;
   }
+
+  .ejercicio-list-container {
+    max-height: 400px; /* Ajusta el alto máximo según tu diseño */
+    overflow-y: auto; /* Permite el scroll vertical */
+    border: 1px solid #ddd; /* Opcional: Añade un borde para que el área de scroll sea más evidente */
+    padding: 8px; /* Espaciado interno */
+    background-color: black; /* Fondo blanco */
+}
