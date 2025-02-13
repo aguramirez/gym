@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { FaSearch, FaUsers, FaList, FaDumbbell } from 'react-icons/fa'; // Íconos
 import './Dashboard.css';
+import ClienteList from './ClienteList';
+import EjercicioList from './EjercicioList';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('Clientes'); // Estado para el segmented control
+  
 
   return (
     <div className="dashboard-container">
@@ -42,9 +45,9 @@ const Dashboard = () => {
 
       {/* Contenido dinámico */}
       <div className="content">
-        {activeTab === 'Clientes' && <p>Lista de Clientes</p>}
+        {activeTab === 'Clientes' && <ClienteList />}
         {activeTab === 'Rutinas' && <p>Lista de Rutinas</p>}
-        {activeTab === 'Ejercicios' && <p>Lista de Ejercicios</p>}
+        {activeTab === 'Ejercicios' && <EjercicioList />}
       </div>
 
     </div>
