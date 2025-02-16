@@ -1,9 +1,11 @@
 import { NuevoEjercicio } from "../components/EjercicioForm";
 
 export interface Ejercicio {
-  id?: number;
+  id: number;
   nombre: string;
   link: string;
+  reps: string;
+  sets: number;
 }
 
 export interface EjercicioFormProps {
