@@ -23,7 +23,11 @@ const RutinaDiaForm: React.FC<RutinaDiaFormProps> = ({ onSave, ejercicios }) => 
       if (ejercicio) {
         setRutinaEjercicios([
           ...rutinaEjercicios,
-          { ...ejercicio, reps, sets },
+          { 
+            ejercicio, // Estructura esperada por el backend
+            reps,
+            sets,
+          },
         ]);
       }
       setSelectedEjercicio(null);
@@ -85,7 +89,7 @@ const RutinaDiaForm: React.FC<RutinaDiaFormProps> = ({ onSave, ejercicios }) => 
       <ul className="list-group mb-3">
         {rutinaEjercicios.map((ej, index) => (
           <li key={index} className="list-group-item bg-secondary text-light">
-            {ej.nombre} - {ej.reps} reps x {ej.sets} sets
+            {ej.ejercicio.nombre} - {ej.reps} reps x {ej.sets} sets
           </li>
         ))}
       </ul>

@@ -10,7 +10,7 @@ type RutinaFormProps = {
 const RutinaForm: React.FC<RutinaFormProps> = ({ onSave }) => {
   const { ejercicios } = useDatos(); // Obtener los ejercicios desde el hook
   const [nombre, setNombre] = useState('');
-  const [dias, setDias] = useState<number>(1);
+  // const [dias, setDias] = useState<number>(1);
   const [rutinaDias, setRutinaDias] = useState<any[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
 
@@ -20,13 +20,14 @@ const RutinaForm: React.FC<RutinaFormProps> = ({ onSave }) => {
   };
 
   const handleSubmit = async () => {
-    const nuevaRutina = { nombre, rutinaDias };
-    console.log("Datos enviados al backend:", nuevaRutina);
+    const rutinaData = { nombre, rutinaDias };
+    console.log('JSON enviado:', JSON.stringify(rutinaData, null, 2)); // Verificar la estructura
     try {
-      const response = await axios.post("http://localhost:8080/rutinas", nuevaRutina);
+      const response = await axios.post('http://localhost:8080/rutinas', rutinaData);
+      console.log('Respuesta del backend:', response.data);
       onSave(response.data); // Notificar al componente padre con la rutina guardada
     } catch (error) {
-      console.error("Error al guardar la rutina:", error);
+      console.error('Error al guardar la rutina:', error);
     }
   };
 
@@ -42,14 +43,14 @@ const RutinaForm: React.FC<RutinaFormProps> = ({ onSave }) => {
         />
       </div>
       <div className="mb-3">
-        <input
+        {/* <input
           className="form-control bg-secondary text-light"
           placeholder="Cantidad de días"
           type="number"
           value={dias}
           onChange={(e) => setDias(Number(e.target.value))}
           min={1}
-        />
+        /> */}
       </div>
       <button className="btn btn-primary mb-3" onClick={() => setModalOpen(true)}>Agregar Días</button>
 
