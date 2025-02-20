@@ -3,7 +3,7 @@ import { NuevoEjercicio } from "../components/EjercicioForm";
 export interface Ejercicio {
   id: number;
   nombre: string;
-  link: string;
+  video: string;
   reps: string;
   sets: number;
 }

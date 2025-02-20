@@ -4,7 +4,7 @@ import { useState } from "react";
 export interface NuevoEjercicio {
     id?: number
     nombre: string;
-    link: string;
+    video: string;
 }
 
 interface EjercicioFormProps {
@@ -14,12 +14,12 @@ interface EjercicioFormProps {
 
 function EjercicioForm({ onSave, initialData }: EjercicioFormProps) {
     const [nombre, setNombre] = useState<string>(initialData?.nombre || "");
-    const [link, setLink] = useState<string>(initialData?.link || "");
+    const [video, setLink] = useState<string>(initialData?.video || "");
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
     
-        const nuevoEjercicio: NuevoEjercicio = { nombre, link };
+        const nuevoEjercicio: NuevoEjercicio = { nombre, video };
     
         try {
             const response = await axios.post("http://localhost:8080/ejercicios", nuevoEjercicio);
@@ -50,9 +50,9 @@ function EjercicioForm({ onSave, initialData }: EjercicioFormProps) {
                 <input
                     type="text"
                     className="form-control"
-                    id="link"
+                    id="video"
                     placeholder="youtube.com"
-                    value={link}
+                    value={video}
                     onChange={(e) => setLink(e.target.value)}
                     required
                 />
