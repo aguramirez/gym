@@ -1,5 +1,7 @@
 package com.example.backend.models.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,14 +18,15 @@ public class RutinaEjercicio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String reps;
+    private int reps;
     private int sets;
 
     @ManyToOne
     @JoinColumn(name = "ejercicio_id")
     private Ejercicio ejercicio;
-// this f shit
+
     @ManyToOne
     @JoinColumn(name = "rutina_dia_id")
+    @JsonBackReference
     private RutinaDia rutinaDia;
 }

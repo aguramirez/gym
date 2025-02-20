@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.models.entity.Rutina;
+import com.example.backend.models.entity.RutinaDia;
+import com.example.backend.models.entity.RutinaEjercicio;
 import com.example.backend.services.RutinaService;
 
 @RestController
@@ -33,6 +35,16 @@ public class RutinaController {
 
     @PostMapping
     public Rutina save(@RequestBody Rutina rutina) {
+        if (rutina.getRutinaDias() != null) {
+        for (RutinaDia dia : rutina.getRutinaDias()) {
+            dia.setRutina(rutina); // Asignar la rutina a cada día
+            if (dia.getRutinaEjercicios() != null) {
+                for (RutinaEjercicio ejercicio : dia.getRutinaEjercicios()) {
+                    ejercicio.setRutinaDia(dia); // Asignar el día a cada ejercicio
+                }
+            }
+        }
+    }
         return rutinaService.save(rutina);
     }
 

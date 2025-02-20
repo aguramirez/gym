@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,5 +39,13 @@ public class RutinaEjercicioController {
     @DeleteMapping("/{id}")
     public void deleteById(@PathVariable Long id) {
         rutinaEjercicioService.deleteById(id);
+    }
+
+    @PutMapping("/{id}")
+    public RutinaEjercicio update(@PathVariable Long id, @RequestBody RutinaEjercicio rutinaEjercicioActualizado) {
+        RutinaEjercicio rutinaEjercicio = rutinaEjercicioService.findById(id);
+        rutinaEjercicio.setReps(rutinaEjercicioActualizado.getReps());
+        rutinaEjercicio.setSets(rutinaEjercicioActualizado.getSets());
+        return rutinaEjercicioService.save(rutinaEjercicio);
     }
 }

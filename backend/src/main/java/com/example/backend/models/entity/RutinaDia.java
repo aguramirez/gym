@@ -2,6 +2,9 @@ package com.example.backend.models.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,8 +27,10 @@ public class RutinaDia {
 
     @ManyToOne
     @JoinColumn(name = "rutina_id")
+    @JsonBackReference
     private Rutina rutina;
 
     @OneToMany(mappedBy = "rutinaDia", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<RutinaEjercicio> rutinaEjercicios;
 }

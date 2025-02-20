@@ -2,6 +2,8 @@ package com.example.backend.models.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,5 +29,6 @@ public class Rutina {
     private Cliente cliente;
 
     @OneToMany(mappedBy = "rutina", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<RutinaDia> rutinaDias;
 }
