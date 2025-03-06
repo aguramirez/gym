@@ -29,7 +29,6 @@ const RutinaDiaForm: React.FC<RutinaDiaFormProps> = ({ onSave, ejercicios, dia }
         setRutinaEjercicios([
           ...rutinaEjercicios,
           {
-            id: Date.now(),
             ejercicio,
             reps,
             sets,

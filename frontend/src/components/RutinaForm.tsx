@@ -63,8 +63,9 @@ const RutinaForm: React.FC<RutinaFormProps> = ({ onSave, rutina }) => {
           rutinaDiaId: dia.id,
         })),
       })),
-    };
-
+    };  
+    // para ver la rutina que se manda al back
+    // console.log("JSON enviado:", JSON.stringify(rutinaData, null, 2));
     try {
       const response = rutina?.id
         ? await axios.put(`http://localhost:8080/rutinas/${rutina.id}`, rutinaData)
