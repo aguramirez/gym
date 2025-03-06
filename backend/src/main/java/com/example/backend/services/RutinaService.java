@@ -32,45 +32,60 @@ public class RutinaService {
     }
 
     public Rutina editarRutina(Long id, Rutina rutinaActualizada) {
-    // Buscar la rutina existente por su ID
-    Rutina rutinaExistente = rutinaRepository.findById(id)
+        Rutina rutinaExistente = rutinaRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Rutina no encontrada"));
-
-    // Actualizar los campos de la rutina existente con los datos de la rutina actualizada
-    rutinaExistente.setNombre(rutinaActualizada.getNombre());
-
-    // Actualizar los días de la rutina
-    if (rutinaActualizada.getRutinaDias() != null) {
-        for (RutinaDia diaActualizado : rutinaActualizada.getRutinaDias()) {
-            RutinaDia diaExistente = rutinaExistente.getRutinaDias().stream()
-                .filter(dia -> dia.getId().equals(diaActualizado.getId()))
-                .findFirst()
-                .orElse(null);
-            
-            if (diaExistente != null) {
-                // Actualizar el nombre del día
-                diaExistente.setNombre(diaActualizado.getNombre());
-                
-                // Actualizar los ejercicios del día
-                if (diaActualizado.getRutinaEjercicios() != null) {
-                    for (RutinaEjercicio ejercicioActualizado : diaActualizado.getRutinaEjercicios()) {
-                        RutinaEjercicio ejercicioExistente = diaExistente.getRutinaEjercicios().stream()
-                            .filter(ejercicio -> ejercicio.getId().equals(ejercicioActualizado.getId()))
-                            .findFirst()
-                            .orElse(null);
-                        
-                        if (ejercicioExistente != null) {
-                            // Actualizar los sets y reps
-                            ejercicioExistente.setReps(ejercicioActualizado.getReps());
-                            ejercicioExistente.setSets(ejercicioActualizado.getSets());
+    
+        rutinaExistente.setNombre(rutinaActualizada.getNombre());
+    
+        // Actualizar o agregar días
+        List<RutinaDia> diasActualizados = rutinaActualizada.getRutinaDias();
+    
+        rutinaExistente.getRutinaDias().removeIf(diaExistente -> 
+            diasActualizados.stream().noneMatch(diaActualizado -> 
+                diaActualizado.getId() != null && diaActualizado.getId().equals(diaExistente.getId())
+            )
+        );
+    
+        for (RutinaDia diaActualizado : diasActualizados) {
+            if (diaActualizado.getId() == null) {
+                diaActualizado.setRutina(rutinaExistente);
+                rutinaExistente.getRutinaDias().add(diaActualizado);
+            } else {
+                RutinaDia diaExistente = rutinaExistente.getRutinaDias().stream()
+                    .filter(d -> d.getId().equals(diaActualizado.getId()))
+                    .findFirst()
+                    .orElse(null);
+                if (diaExistente != null) {
+                    diaExistente.setNombre(diaActualizado.getNombre());
+    
+                    List<RutinaEjercicio> ejerciciosActualizados = diaActualizado.getRutinaEjercicios();
+    
+                    diaExistente.getRutinaEjercicios().removeIf(ejercicioExistente -> 
+                        ejerciciosActualizados.stream().noneMatch(ejercicioActualizado -> 
+                            ejercicioActualizado.getId() != null && ejercicioActualizado.getId().equals(ejercicioExistente.getId())
+                        )
+                    );
+    
+                    for (RutinaEjercicio ejercicioActualizado : ejerciciosActualizados) {
+                        if (ejercicioActualizado.getId() == null) {
+                            ejercicioActualizado.setRutinaDia(diaExistente);
+                            diaExistente.getRutinaEjercicios().add(ejercicioActualizado);
+                        } else {
+                            RutinaEjercicio ejercicioExistente = diaExistente.getRutinaEjercicios().stream()
+                                .filter(e -> e.getId().equals(ejercicioActualizado.getId()))
+                                .findFirst()
+                                .orElse(null);
+                            if (ejercicioExistente != null) {
+                                ejercicioExistente.setReps(ejercicioActualizado.getReps());
+                                ejercicioExistente.setSets(ejercicioActualizado.getSets());
+                            }
                         }
                     }
                 }
             }
         }
+    
+        return rutinaRepository.save(rutinaExistente);
     }
-
-    // Guardar la rutina actualizada, incluidos los días y ejercicios
-    return rutinaRepository.save(rutinaExistente);
-}
+    
 }

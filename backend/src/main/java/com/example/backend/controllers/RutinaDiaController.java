@@ -43,24 +43,24 @@ public class RutinaDiaController {
     }
 
     @PutMapping("/{id}")
-public RutinaDia update(@PathVariable Long id, @RequestBody RutinaDia rutinaDiaActualizada) {
-    // Buscar el día de rutina existente
-    RutinaDia rutinaDia = rutinaDiaService.findById(id);
-    
-    // Actualizar los campos del día
-    rutinaDia.setNombre(rutinaDiaActualizada.getNombre());
-    
-    // Agregar los nuevos ejercicios si existen
-    if (rutinaDiaActualizada.getRutinaEjercicios() != null) {
-        for (RutinaEjercicio ejercicioNuevo : rutinaDiaActualizada.getRutinaEjercicios()) {
-            // Asignar el RutinaDia al ejercicio para la relación bidireccional
-            ejercicioNuevo.setRutinaDia(rutinaDia);
-            // Agregar el ejercicio al día de rutina
-            rutinaDia.getRutinaEjercicios().add(ejercicioNuevo);
-        }
-    }
+    public RutinaDia update(@PathVariable Long id, @RequestBody RutinaDia rutinaDiaActualizada) {
+        // Buscar el día de rutina existente
+        RutinaDia rutinaDia = rutinaDiaService.findById(id);
 
-    // Guardar el día actualizado con los ejercicios nuevos
-    return rutinaDiaService.save(rutinaDia);
-}
+        // Actualizar los campos del día
+        rutinaDia.setNombre(rutinaDiaActualizada.getNombre());
+
+        // Agregar los nuevos ejercicios si existen
+        if (rutinaDiaActualizada.getRutinaEjercicios() != null) {
+            for (RutinaEjercicio ejercicioNuevo : rutinaDiaActualizada.getRutinaEjercicios()) {
+                // Asignar el RutinaDia al ejercicio para la relación bidireccional
+                ejercicioNuevo.setRutinaDia(rutinaDia);
+                // Agregar el ejercicio al día de rutina
+                rutinaDia.getRutinaEjercicios().add(ejercicioNuevo);
+            }
+        }
+
+        // Guardar el día actualizado con los ejercicios nuevos
+        return rutinaDiaService.save(rutinaDia);
+    }
 }
