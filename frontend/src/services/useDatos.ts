@@ -1,57 +1,68 @@
-import { useState, useEffect } from 'react';
-import { getClientes, getEjercicios, getRutinas } from './api'; // Importa tus funciones de API
-import { Cliente } from '../models/Cliente';
-import { Ejercicio } from '../models/Ejercicios';
-import { Rutina } from '../models/Rutina'
+import { useState, useEffect, useCallback } from "react";
+import { getClientes, getEjercicios, getRutinas } from "./api"; // Importa tus funciones de API
+import { Cliente } from "../models/Cliente";
+import { Ejercicio } from "../models/Ejercicios";
+import { Rutina } from "../models/Rutina";
 
 const useDatos = () => {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [ejercicios, setEjercicios] = useState<Ejercicio[]>([]);
-  const [rutinas, setRutinas] = useState<Rutina[]>([]);
+    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [ejercicios, setEjercicios] = useState<Ejercicio[]>([]);
+    const [rutinas, setRutinas] = useState<Rutina[]>([]);
 
-  // Obtener clientes al cargar el componente
-  useEffect(() => {
-    fetchClientes();
-  }, []);
+    // Funciones para obtener datos
+    const fetchClientes = useCallback(async () => {
+        try {
+            const data = await getClientes();
+            if (Array.isArray(data)) {
+                setClientes(data);
+            } else {
+                console.error("La API no devolvió un array de clientes:", data);
+                setClientes([]);
+            }
+        } catch (error) {
+            console.error("Error al obtener clientes:", error);
+            setClientes([]);
+        }
+    }, []);
 
-  const fetchClientes = async () => {
-    try {
-      const data = await getClientes(); // Función que obtiene los clientes desde la API
-      setClientes(data);
-    } catch (error) {
-      console.error('Error al obtener clientes:', error);
-    }
-  };
+    const fetchEjercicios = useCallback(async () => {
+        try {
+            const data = await getEjercicios();
+            if (Array.isArray(data)) {
+                setEjercicios(data);
+            } else {
+                console.error("La API no devolvió un array de ejercicios:", data);
+                setEjercicios([]);
+            }
+        } catch (error) {
+            console.error("Error al obtener ejercicios:", error);
+            setEjercicios([]);
+        }
+    }, []);
 
-  // Obtener ejercicios al cargar el componente
-  useEffect(() => {
-    fetchEjercicios();
-  }, []);
+    const fetchRutinas = useCallback(async () => {
+        try {
+            const data = await getRutinas();
+            if (Array.isArray(data)) {
+                setRutinas(data);
+            } else {
+                console.error("La API no devolvió un array de rutinas:", data);
+                setRutinas([]);
+            }
+        } catch (error) {
+            console.error("Error al obtener rutinas:", error);
+            setRutinas([]);
+        }
+    }, []);
 
-  const fetchEjercicios = async () => {
-    try {
-      const data = await getEjercicios(); // Función que obtiene los ejercicios desde la API
-      setEjercicios(data);
-    } catch (error) {
-      console.error('Error al obtener ejercicios:', error);
-    }
-  };
+    // Unificar los useEffect en un solo bloque
+    useEffect(() => {
+        fetchClientes();
+        fetchEjercicios();
+        fetchRutinas();
+    }, [fetchClientes, fetchEjercicios, fetchRutinas]);
 
-  // Obtener rutinas al cargar el componente
-  useEffect(() => {
-    fetchRutinas();
-  }, []);
-
-  const fetchRutinas = async () => {
-    try {
-      const data = await getRutinas(); // Función que obtiene las rutinas desde la API
-      setRutinas(data);
-    } catch (error) {
-      console.error('Error al obtener rutinas:', error);
-    }
-  };
-
-  return { clientes, ejercicios, rutinas, fetchClientes, fetchEjercicios, fetchRutinas };
+    return { clientes, ejercicios, rutinas, fetchClientes, fetchEjercicios, fetchRutinas };
 };
 
 export default useDatos;
