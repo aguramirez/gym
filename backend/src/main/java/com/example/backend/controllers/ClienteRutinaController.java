@@ -1,22 +1,25 @@
 package com.example.backend.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.models.entity.ClienteRutina;
 import com.example.backend.repositories.ClienteRutinaService;
 
 @RestController
-@RequestMapping("/clientes")
+@RequestMapping("/cliente-rutinas")
 public class ClienteRutinaController {
 
     @Autowired
     private ClienteRutinaService clienteRutinaService;
 
-    @PostMapping("/{clienteId}/asignar-rutina/{rutinaId}")
-    public void asignarRutinaACliente(@PathVariable Long clienteId, @PathVariable Long rutinaId) {
-        clienteRutinaService.asignarRutinaACliente(clienteId, rutinaId);
+    @PostMapping("/asignar")
+    public ResponseEntity<ClienteRutina> asignarRutina(@RequestParam Long clienteId, @RequestParam Long rutinaId) {
+        ClienteRutina nuevaAsignacion = clienteRutinaService.asignarRutinaACliente(clienteId, rutinaId);
+        return ResponseEntity.ok(nuevaAsignacion);
     }
 }

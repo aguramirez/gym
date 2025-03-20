@@ -2,6 +2,9 @@ package com.example.backend.models.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,6 +29,8 @@ public class ClienteRutina {
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
+    @JsonBackReference
+    @JsonIgnore
     private Cliente cliente;
 
     @ManyToOne
