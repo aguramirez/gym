@@ -1,11 +1,14 @@
 package com.example.backend.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.models.entity.Cliente;
+import com.example.backend.models.entity.ClienteRutina;
+import com.example.backend.models.entity.Rutina;
 import com.example.backend.repositories.ClienteRepository;
 
 @Service
@@ -46,5 +49,14 @@ public class ClienteService {
 
         // Guardar el cliente actualizado en la base de datos
         return clienteRepository.save(clienteExistente);
+    }
+
+    public List<Rutina> obtenerRutinasDeCliente(Long clienteId) {
+        Cliente cliente = clienteRepository.findById(clienteId)
+                .orElseThrow(() -> new RuntimeException("Cliente no encontrado"));
+        
+        return cliente.getClienteRutinas().stream()
+                .map(ClienteRutina::getRutina)
+                .collect(Collectors.toList());
     }
 }

@@ -3,6 +3,7 @@ package com.example.backend.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.models.entity.Cliente;
+import com.example.backend.models.entity.Rutina;
 import com.example.backend.services.ClienteService;
 
 @RestController
@@ -50,5 +52,11 @@ public class ClienteController {
     @PutMapping("/{id}")
     public Cliente editarCliente(@PathVariable Long id, @RequestBody Cliente clienteActualizado) {
         return clienteService.editarCliente(id, clienteActualizado);
+    }
+
+    @GetMapping("/{clienteId}/rutinas")
+    public ResponseEntity<List<Rutina>> getRutinasDeCliente(@PathVariable Long clienteId) {
+        List<Rutina> rutinas = clienteService.obtenerRutinasDeCliente(clienteId);
+        return ResponseEntity.ok(rutinas);
     }
 }

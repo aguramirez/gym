@@ -6,19 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.example.backend.models.entity.ClienteRutina;
-import com.example.backend.models.entity.ClienteRutinaEjercicio;
+import com.example.backend.models.entity.ClienteRutinaDia;
 
 import jakarta.transaction.Transactional;
 
-public interface ClienteRutinaEjercicioRepository extends JpaRepository<ClienteRutinaEjercicio, Long> {
+public interface ClienteRutinaDiaRepository extends JpaRepository<ClienteRutinaDia, Long> {
     @Modifying
     @Transactional
-    @Query("DELETE FROM ClienteRutinaEjercicio cre WHERE cre.clienteRutina = :clienteRutina")
+    @Query("DELETE FROM ClienteRutinaDia crd WHERE crd.clienteRutina = :clienteRutina")
     void deleteByClienteRutina(@Param("clienteRutina") ClienteRutina clienteRutina);
-
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM ClienteRutinaEjercicio cre WHERE cre.clienteRutinaDia.id = :clienteRutinaDiaId")
-    void deleteByClienteRutinaDiaId(@Param("clienteRutinaDiaId") Long clienteRutinaDiaId);
-
 }

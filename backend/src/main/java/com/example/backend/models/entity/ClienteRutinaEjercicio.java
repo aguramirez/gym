@@ -27,4 +27,8 @@ public class ClienteRutinaEjercicio {
     @ManyToOne
     @JoinColumn(name = "cliente_rutina_dia_id")
     private ClienteRutinaDia clienteRutinaDia;
+
+    @ManyToOne
+    @JoinColumn(name = "cliente_rutina_id")
+    private ClienteRutina clienteRutina;
 }

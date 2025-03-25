@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -37,6 +38,9 @@ public class ClienteRutina {
     @JoinColumn(name = "rutina_id")
     private Rutina rutina;
 
-    @OneToMany(mappedBy = "clienteRutina", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "clienteRutina", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ClienteRutinaDia> clienteRutinaDias;
+
+    @OneToMany(mappedBy = "clienteRutina", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<ClienteRutinaEjercicio> clienteRutinaEjercicios;
 }
