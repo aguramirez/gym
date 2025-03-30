@@ -1,96 +1,102 @@
 import React from "react";
+import { FaEdit } from "react-icons/fa";
 
-interface EjercicioViewProps {
-  ejercicio: {
-    id: number;
-    nombre: string;
-    video: string;
-  } | null;
-  onClose: () => void;
+interface Ejercicio {
+  id: number;
+  nombre: string;
+  video: string;
 }
 
-const transformYouTubeLink = (link: string) => {
-  const videoID = link.split("v=")[1]?.split("&")[0]; // Extrae el ID del video
-  return `https://www.youtube.com/embed/${videoID}?autoplay=1&loop=1&playlist=${videoID}`; // Asegura que el video se repita
-};
+interface EjercicioViewProps {
+  ejercicio: Ejercicio;
+  onClose: () => void;
+  onEdit: () => void;
+}
 
-const transformYouTubeShortsLink = (link: string) => {
-  const videoID = link.split("/")[4]; // Extrae el ID del short
-  return `https://www.youtube.com/embed/${videoID}?autoplay=1&loop=1&playlist=${videoID}`; // Asegura que el video se repita
-};
-
-const transformInstagramReelLink = (link: string) => {
-  const postID = link.split("/")[4]; // Extrae el ID del post
-  return `https://www.instagram.com/p/${postID}/embed/`; // Reels no pueden ir en loop, pero los dejamos repetidamente accesibles
-};
-
-const EjercicioView: React.FC<EjercicioViewProps> = ({ ejercicio, onClose }) => {
-  if (!ejercicio) return null;
-
-  // Función para determinar el tipo de video y su correspondiente URL de incrustación
-  const getEmbeddedVideoLink = (link: string) => {
-    if (link.includes("youtube.com")) {
-      // Si es un video normal de YouTube
-      if (link.includes("shorts")) {
-        // Si es un YouTube Short
-        return transformYouTubeShortsLink(link);
-      } else {
-        // Video regular de YouTube
-        return transformYouTubeLink(link);
-      }
-    } else if (link.includes("instagram.com")) {
-      // Si es un Reel de Instagram
-      return transformInstagramReelLink(link);
+const EjercicioView: React.FC<EjercicioViewProps> = ({ ejercicio, onClose, onEdit }) => {
+  // Función para formatear enlaces de video
+  const getEmbedUrl = (url: string | undefined) => {
+    if (!url) return "";
+    
+    // YouTube normal
+    if (url.includes("youtube.com/watch")) {
+        const videoId = url.split("v=")[1]?.split("&")[0];
+        if (videoId) return `https://www.youtube.com/embed/${videoId}`;
     }
-    return ""; // Si no es un link reconocido
+    
+    // YouTube Shorts
+    if (url.includes("youtube.com/shorts")) {
+        const videoId = url.split("/shorts/")[1]?.split("?")[0];
+        if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    // Instagram Reels / Posts (necesita incluir /embed/ en la URL)
+    if (url.includes("instagram.com/")) {
+        if (url.includes("/p/") || url.includes("/reel/")) {
+            const parts = url.split("/");
+            const id = parts[parts.indexOf("p") + 1] || parts[parts.indexOf("reel") + 1];
+            if (id) return `https://www.instagram.com/p/${id}/embed/`;
+        }
+    }
+    
+    return url; // Si no se reconoce ningún patrón, devolver la URL original
   };
 
   // Función para determinar los estilos del iframe según el tipo de video
   const getIframeStyles = (link: string) => {
-    if (link.includes("shorts") || link.includes("instagram.com")) {
-      return {
-        width: "100%",
-        height: "400px",  // Ajustar la altura para videos verticales
-        maxWidth: "300px", // Ajustar el ancho para videos verticales
-        margin: "0 auto",  // Centrar el iframe
-        borderRadius: "8px", // Bordes redondeados
-      };
-    } else {
-      return {
-        width: "100%",
-        height: "200px",  // Tamaño predeterminado para videos horizontales
-      };
-    }
+    const isVertical = link.includes("shorts") || link.includes("instagram.com");
+    return {
+      width: "100%",
+      height: isVertical ? "600px" : "400px",
+      maxWidth: isVertical ? "380px" : "100%",
+      margin: "0 auto",
+      borderRadius: "8px",
+      border: "1px solid #ddd",
+      display: "block"
+    };
   };
 
   return (
-    <div
-      className="modal show"
-      style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-    >
-      <div className="modal-dialog">
-        <div className="modal-content">
-          <div className="modal-header">
-            <button type="button" className="btn-close" onClick={onClose}></button>
-          </div>
-          <div className="modal-body">
-            <div className="card" style={{ width: "21rem" }}>
-              <div className="card-img-top">
-                <iframe
-                  style={getIframeStyles(ejercicio.video)}  // Estilos dinámicos
-                  src={getEmbeddedVideoLink(ejercicio.video)}
-                  title={ejercicio.nombre}
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
-              </div>
-              <div className="card-body">
-                <h5 className="card-title">{ejercicio.nombre}</h5>
-              </div>
-            </div>
-          </div>
+    <div className="ejercicio-details">
+      <div className="ejercicio-info">
+        <div className="info-row">
+          <strong>Nombre:</strong>
+          <span>{ejercicio.nombre}</span>
         </div>
+        
+        {ejercicio.video && (
+          <div className="info-row">
+            <strong>URL del video:</strong>
+            <a href={ejercicio.video} target="_blank" rel="noopener noreferrer">
+              {ejercicio.video}
+            </a>
+          </div>
+        )}
+      </div>
+      
+      {ejercicio.video ? (
+        <div className="video-container">
+          <iframe
+            style={getIframeStyles(ejercicio.video)}
+            src={getEmbedUrl(ejercicio.video)}
+            title={ejercicio.nombre}
+            allowFullScreen
+            loading="lazy"
+          ></iframe>
+        </div>
+      ) : (
+        <div className="no-video">
+          <p>No hay video disponible para este ejercicio</p>
+        </div>
+      )}
+      
+      <div className="modal-actions">
+        <button 
+          className="btn-primary"
+          onClick={onEdit}
+        >
+          <FaEdit /> Editar Ejercicio
+        </button>
       </div>
     </div>
   );

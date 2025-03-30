@@ -1,155 +1,338 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import useDatos from "../services/useDatos";
-import EjercicioForm, { NuevoEjercicio } from "./EjercicioForm";
+import { FaPlus, FaTrash, FaEdit, FaEye, FaSpinner, FaSync } from "react-icons/fa";
+import EjercicioForm from "./EjercicioForm";
 import EjercicioView from "./EjercicioView";
-import { FaTrash, FaEdit } from "react-icons/fa";
-import { CgAddR } from "react-icons/cg";
-import { LuRefreshCcw } from "react-icons/lu";
+import authService from "../services/authService";
+import "./componentStyles.css"; // Asegúrate de tener un archivo de estilos común
+
+export interface Ejercicio {
+  id?: number; // Hacemos id opcional para permitir creación de nuevos ejercicios
+  nombre: string;
+  video: string;
+}
 
 const EjercicioList = () => {
-  const { ejercicios, fetchEjercicios } = useDatos();
-  const [showModal, setShowModal] = useState(false);
-  const [editingEjercicio, setEditingEjercicio] = useState<NuevoEjercicio | null>(null);
-  const [selectedEjercicio, setSelectedEjercicio] = useState<{
-    id: number;
-    nombre: string;
-    video: string;
-  } | null>(null);
+  // Estados para manejar los datos y la interfaz
+  const { ejercicios = [], fetchEjercicios } = useDatos() as { ejercicios: Ejercicio[], fetchEjercicios: () => Promise<void> };
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredEjercicios, setFilteredEjercicios] = useState<Ejercicio[]>([]);
+  const [selectedEjercicio, setSelectedEjercicio] = useState<Ejercicio | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleOpenModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
+  // Inicializar la lista filtrada cuando se cargan los ejercicios
+  useEffect(() => {
+    if (Array.isArray(ejercicios)) {
+      setFilteredEjercicios(ejercicios);
+    } else {
+      setFilteredEjercicios([]);
+    }
+  }, [ejercicios]);
 
-  const handleDelete = async (id?: number) => {
+  // Filtrar ejercicios cuando cambia el término de búsqueda
+  useEffect(() => {
+    if (!Array.isArray(ejercicios)) return;
+    
+    if (!searchTerm.trim()) {
+      setFilteredEjercicios(ejercicios);
+      return;
+    }
+    
+    const filtered = ejercicios.filter(ejercicio => 
+      ejercicio.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    setFilteredEjercicios(filtered);
+  }, [searchTerm, ejercicios]);
+
+  // Manejadores para los modales
+  const handleOpenFormModal = (ejercicio: Ejercicio | null = null) => {
+    setSelectedEjercicio(ejercicio);
+    setEditMode(!!ejercicio);
+    setShowFormModal(true);
+  };
+
+  const handleCloseFormModal = () => {
+    setShowFormModal(false);
+    setSelectedEjercicio(null);
+    setEditMode(false);
+  };
+
+  const handleOpenViewModal = async (ejercicioId?: number) => {
+    if (!ejercicioId) {
+      console.error("ID de ejercicio no válido");
+      return;
+    }
+    
     try {
-      await axios.delete(`http://localhost:8080/ejercicios/${id}`);
-      fetchEjercicios();
+      setIsLoading(true);
+      const response = await axios.get<Ejercicio>(`http://localhost:8080/ejercicios/${ejercicioId}`, {
+        headers: {
+          'Authorization': authService.getToken()
+        }
+      });
+      setSelectedEjercicio(response.data);
+      setShowViewModal(true);
     } catch (error) {
-      console.error("Error al eliminar el ejercicio:", error);
+      console.error("Error al obtener detalles del ejercicio:", error);
+      setError("No se pudo cargar el ejercicio");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleEdit = (ejercicio: NuevoEjercicio) => {
-    setEditingEjercicio(ejercicio);
-    setShowModal(true);
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setSelectedEjercicio(null);
   };
 
-  const handleViewEjercicio = (ejercicio: { id: number; nombre: string; video: string }) => {
-    setSelectedEjercicio(ejercicio);
+  // Manejador para guardar o actualizar ejercicio
+  const handleSaveEjercicio = async (ejercicio: Ejercicio) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // Si estamos en modo edición, actualizar
+      if (editMode && selectedEjercicio?.id) {
+        await axios.put(
+          `http://localhost:8080/ejercicios/${selectedEjercicio.id}`, 
+          ejercicio,
+          {
+            headers: {
+              'Authorization': authService.getToken()
+            }
+          }
+        );
+        alert("Ejercicio actualizado con éxito");
+      } else {
+        // Si no, crear nuevo
+        await axios.post(
+          "http://localhost:8080/ejercicios", 
+          ejercicio,
+          {
+            headers: {
+              'Authorization': authService.getToken()
+            }
+          }
+        );
+        alert("Ejercicio creado con éxito");
+      }
+      
+      // Actualizar lista
+      await fetchEjercicios();
+      handleCloseFormModal();
+    } catch (error: any) {
+      console.error("Error al guardar ejercicio:", error);
+      
+      // Manejar diferentes tipos de errores
+      if (error.response) {
+        if (error.response.status === 409) {
+          setError("Ya existe un ejercicio con ese nombre");
+        } else if (error.response.data && typeof error.response.data === 'string') {
+          setError(error.response.data);
+        } else {
+          setError(`Error: ${error.response.status}`);
+        }
+      } else {
+        setError("Error de conexión con el servidor");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const onSaveEjercicio = (nuevoEjercicio: NuevoEjercicio) => {
-    if (editingEjercicio) {
-      axios
-        .put(`http://localhost:8080/ejercicios/${editingEjercicio.id}`, nuevoEjercicio)
-        .then(() => {
-          fetchEjercicios();
-          handleCloseModal();
-        })
-        .catch((error) => console.error("Error al actualizar ejercicio:", error));
-    } else {
-      axios
-        .post("http://localhost:8080/ejercicios", nuevoEjercicio)
-        .then(() => {
-          fetchEjercicios();
-          handleCloseModal();
-        })
-        .catch((error) => console.error("Error al guardar el ejercicio:", error));
+  // Manejador para eliminar ejercicio
+  const handleDeleteEjercicio = async (id?: number) => {
+    if (!id) {
+      console.error("ID de ejercicio no válido");
+      return;
+    }
+    
+    if (!confirm("¿Estás seguro de que deseas eliminar este ejercicio?")) return;
+    
+    try {
+      setIsLoading(true);
+      await axios.delete(`http://localhost:8080/ejercicios/${id}`, {
+        headers: {
+          'Authorization': authService.getToken()
+        }
+      });
+      await fetchEjercicios();
+      alert("Ejercicio eliminado con éxito");
+    } catch (error: any) {
+      console.error("Error al eliminar ejercicio:", error);
+      
+      // Manejar errores de eliminación
+      if (error.response) {
+        if (error.response.status === 409 || 
+            (error.response.data && error.response.data.includes("integridad referencial"))) {
+          alert("No se puede eliminar este ejercicio porque está siendo utilizado en una o más rutinas");
+        } else {
+          alert(`Error al eliminar: ${error.response.data || error.message}`);
+        }
+      } else {
+        alert(`Error de conexión: ${error.message}`);
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <h1 className="list-title">Lista de Ejercicios</h1>
-      <button className="btn btn-primary m-1" onClick={handleOpenModal}>
-        <CgAddR />
-      </button>
-      <button className="btn btn-primary" onClick={fetchEjercicios}>
-        <LuRefreshCcw />
-      </button>
-      {showModal && (
-        <div
-          className="modal show"
-          style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
-        >
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {editingEjercicio ? "Editar Ejercicio" : "Nuevo Ejercicio"}
-                </h5>
-                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
-              </div>
-              <div className="modal-body">
-                <EjercicioForm
-                  onSave={onSaveEjercicio}
-                  initialData={editingEjercicio}
-                />
-              </div>
+    <div className="container-section">
+      <div className="section-header">
+        <h1>Gestión de Ejercicios</h1>
+        <div className="section-controls">
+          {/* Barra de búsqueda */}
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Buscar ejercicio..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          {/* Botón para nuevo ejercicio */}
+          <button 
+            className="btn-primary"
+            onClick={() => handleOpenFormModal(null)}
+            title="Agregar Nuevo Ejercicio"
+          >
+            <FaPlus /> Nuevo Ejercicio
+          </button>
+          {/* Botón para actualizar lista */}
+          <button 
+            className="btn-secondary" 
+            onClick={fetchEjercicios}
+            title="Actualizar Lista"
+          >
+            <FaSync /> Actualizar
+          </button>
+        </div>
+      </div>
+      
+      {/* Indicador de carga */}
+      {isLoading && !showFormModal && !showViewModal ? (
+        <div className="loading-indicator">
+          <FaSpinner className="loading-spinner" />
+          <p>Cargando ejercicios...</p>
+        </div>
+      ) : (
+        <div className="list-section">
+          {/* Lista vacía o tabla de ejercicios */}
+          {(!filteredEjercicios || filteredEjercicios.length === 0) ? (
+            <div className="empty-list">
+              <p>No hay ejercicios disponibles</p>
+              {searchTerm && <p>Prueba con un término de búsqueda diferente</p>}
+              <button 
+                className="btn-primary"
+                onClick={() => handleOpenFormModal(null)}
+              >
+                <FaPlus /> Crear Primer Ejercicio
+              </button>
+            </div>
+          ) : (
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Video</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredEjercicios.map(ejercicio => (
+                  <tr key={ejercicio.id}>
+                    <td>{ejercicio.nombre}</td>
+                    <td>{ejercicio.video ? 'Disponible' : 'No disponible'}</td>
+                    <td>
+                      <div className="action-buttons">
+                        <button 
+                          className="btn-icon btn-primary" 
+                          onClick={() => handleOpenViewModal(ejercicio.id)}
+                          title="Ver Detalles"
+                        >
+                          <FaEye />
+                        </button>
+                        <button 
+                          className="btn-icon btn-warning"
+                          onClick={() => handleOpenFormModal(ejercicio)}
+                          title="Editar Ejercicio"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button 
+                          className="btn-icon btn-danger"
+                          onClick={() => handleDeleteEjercicio(ejercicio.id)}
+                          title="Eliminar Ejercicio"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      {/* Modal para crear/editar ejercicio */}
+      {showFormModal && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <div className="modal-header">
+              <h2>{editMode ? "Editar Ejercicio" : "Crear Nuevo Ejercicio"}</h2>
+              <button 
+                className="btn-close" 
+                onClick={handleCloseFormModal}
+                disabled={isLoading}
+              >×</button>
+            </div>
+            <div className="modal-body">
+              {error && <div className="error-message">{error}</div>}
+              <EjercicioForm
+                onSave={handleSaveEjercicio}
+                initialData={selectedEjercicio}
+                isLoading={isLoading}
+                editMode={editMode}
+              />
             </div>
           </div>
         </div>
       )}
-      <div className="ejercicio-list-container">
-        {ejercicios.length === 0 ? (
-          <p>No hay ejercicios disponibles</p>
-        ) : (
-          <table className="table table-dark">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Nombre</th>
-                <th scope="col">Editar</th>
-                <th scope="col">Eliminar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ejercicios.map((ejercicio, index) => (
-                <tr key={ejercicio.id}>
-                  <th scope="row">{index + 1}</th>
-                  <td>
-                    <button
-                      className="btn btn-link"
-                      onClick={() =>
-                        handleViewEjercicio({
-                          id: ejercicio.id,
-                          nombre: ejercicio.nombre,
-                          video: ejercicio.video,
-                        })
-                      }
-                    >
-                      {ejercicio.nombre}
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-warning"
-                      onClick={() => handleEdit(ejercicio)}
-                    >
-                      <FaEdit />
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(ejercicio.id)}
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-      {selectedEjercicio && (
-        <EjercicioView
-          ejercicio={selectedEjercicio}
-          onClose={() => setSelectedEjercicio(null)}
-        />
+
+      {/* Modal para ver detalles del ejercicio */}
+      {showViewModal && selectedEjercicio && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <div className="modal-header">
+              <h2>{selectedEjercicio.nombre}</h2>
+              <button 
+                className="btn-close" 
+                onClick={handleCloseViewModal}
+              >×</button>
+            </div>
+            <div className="modal-body">
+              <EjercicioView 
+                ejercicio={selectedEjercicio as Required<Ejercicio>} // Asegurar que tenga id
+                onClose={handleCloseViewModal} 
+                onEdit={() => {
+                  handleCloseViewModal();
+                  handleOpenFormModal(selectedEjercicio);
+                }}
+              />
+            </div>
+          </div>
+        </div>
       )}
-    </>
+    </div>
   );
 };
 

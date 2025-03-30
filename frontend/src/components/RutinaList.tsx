@@ -1,154 +1,364 @@
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useState } from "react";
 import useDatos from "../services/useDatos";
+import { FaPlus, FaEdit, FaTrash, FaEye, FaSpinner, FaSync } from "react-icons/fa";
 import RutinaForm from "./RutinaForm";
-import { FaTrash, FaEdit } from "react-icons/fa";
-import { CgAddR } from "react-icons/cg";
-import { LuRefreshCcw } from "react-icons/lu";
-import RutinaView from "./RutinaView";  // Importa el componente RutinaView
+import "./rutinaList.css";
+import authService from "../services/authService"; // Importamos el servicio de autenticación
+
+interface Ejercicio {
+  id: number;
+  nombre: string;
+  video?: string;
+}
+
+interface RutinaEjercicio {
+  id?: number;
+  reps: number;
+  sets: number;
+  ejercicioId: number;
+  ejercicioNombre?: string;
+  ejercicioVideo?: string;
+}
+
+interface RutinaDia {
+  id?: number;
+  nombre: string;
+  rutinaEjercicios: RutinaEjercicio[];
+}
+
+interface Rutina {
+  id?: number;
+  nombre: string;
+  clienteId?: number; // Hacemos clienteId explícito
+  rutinaDias: RutinaDia[];
+}
 
 const RutinaList = () => {
-  const { rutinas, fetchRutinas } = useDatos();
-  const [showModal, setShowModal] = useState(false);
-  const [editingRutina, setEditingRutina] = useState<{ id?: number; nombre: string; rutinaDias: any[] } | null>(null);
-
-  const [showRutinaViewModal, setShowRutinaViewModal] = useState<boolean>(false); // Estado para mostrar el modal de RutinaView
-  const [selectedRutina, setSelectedRutina] = useState<{ id: number; nombre: string } | null>(null); // Rutina seleccionada para mostrar en RutinaView
-
-  const handleOpenModal = () => setShowModal(true);
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingRutina(null);
-  };
-
-  const handleDelete = async (id?: number) => {
-    try {
-      await axios.delete(`http://localhost:8080/rutinas/${id}`);
-      fetchRutinas(); // Refrescar la lista de rutinas
-    } catch (error) {
-      console.error("Error al eliminar la rutina:", error);
+  const { rutinas, ejercicios, fetchRutinas } = useDatos();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredRutinas, setFilteredRutinas] = useState<any[]>([]);
+  const [selectedRutina, setSelectedRutina] = useState<Rutina | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  
+  // Filtrar rutinas cuando cambia el término de búsqueda
+  useEffect(() => {
+    if (!rutinas) return;
+    
+    if (!searchTerm.trim()) {
+      setFilteredRutinas(rutinas);
+      return;
     }
-  };
+    
+    const filtered = rutinas.filter(rutina => 
+      rutina.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    setFilteredRutinas(filtered);
+  }, [searchTerm, rutinas]);
 
-  const handleEdit = (rutina: { id?: number; nombre: string; rutinaDias?: any[] }) => {
-    setEditingRutina({
-      ...rutina,
-      rutinaDias: rutina.rutinaDias || [], // Garantizar que rutinaDias sea un array
-    });
-    setShowModal(true);
-  };
-
-  const onSaveRutina = (nuevaRutina: { nombre: string }) => {
-    // Si hay una rutina en edición, actualizamos, si no, es nueva
-    if (editingRutina) {
-      // Actualización de rutina
-      axios.put(`http://localhost:8080/rutinas/${editingRutina.id}`, nuevaRutina)
-        .then(() => {
-          fetchRutinas(); // Refrescar lista
-          handleCloseModal(); // Cerrar modal
-        })
-        .catch((error) => console.error("Error al actualizar rutina:", error));
-    } else {
-      // Creación de nueva rutina
-      axios.post("http://localhost:8080/rutinas", nuevaRutina)
-        .then(() => {
-          fetchRutinas(); // Refrescar lista
-          handleCloseModal(); // Cerrar modal
-        })
-        .catch((error) => console.error("Error al guardar la rutina:", error));
-    }
-  };
-
-  const handleOpenRutinaViewModal = (rutina: { id: number; nombre: string }) => {
+  const handleOpenFormModal = (rutina: Rutina | null = null) => {
     setSelectedRutina(rutina);
-    setShowRutinaViewModal(true); // Mostrar el modal de RutinaView
+    setEditMode(!!rutina);
+    setShowFormModal(true);
   };
 
-  const handleCloseRutinaViewModal = () => {
-    setShowRutinaViewModal(false);
-    setSelectedRutina(null); // Resetear la rutina seleccionada
+  const handleCloseFormModal = () => {
+    setShowFormModal(false);
+    setSelectedRutina(null);
+    setEditMode(false);
+  };
+
+  const handleOpenViewModal = async (rutinaId: number) => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(`http://localhost:8080/rutinas/${rutinaId}`);
+      setSelectedRutina(response.data);
+      setShowViewModal(true);
+    } catch (error) {
+      console.error("Error al obtener detalles de la rutina:", error);
+      alert("No se pudo cargar la rutina");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCloseViewModal = () => {
+    setShowViewModal(false);
+    setSelectedRutina(null);
+  };
+
+  const handleDeleteRutina = async (id?: number) => {
+    if (!id) return;
+    
+    if (!confirm("¿Estás seguro de que deseas eliminar esta rutina? Esta acción no se puede deshacer.")) {
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      await axios.delete(`http://localhost:8080/rutinas/${id}`);
+      await fetchRutinas();
+      alert("Rutina eliminada con éxito");
+    } catch (error: any) {
+      console.error("Error al eliminar la rutina:", error);
+      
+      // Comprobar si el error es porque la rutina está asignada a clientes
+      if (error.response?.status === 409 || 
+          (error.response?.data && error.response.data.includes("integridad referencial"))) {
+        alert("No se puede eliminar esta rutina porque está asignada a uno o más clientes");
+      } else {
+        alert(`Error al eliminar la rutina: ${error.response?.data || error.message}`);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveRutina = async (rutina: Rutina) => {
+    try {
+      setIsLoading(true);
+      
+      // Asegurarnos de que clienteId esté establecido (lo tomamos de authService si no existe)
+      if (!rutina.clienteId) {
+        const currentUser = authService.getCurrentUser();
+        rutina.clienteId = currentUser?.clienteId || undefined;
+      }
+      
+      console.log("Guardando rutina con datos:", JSON.stringify(rutina));
+      
+      // Crear o actualizar rutina
+      if (editMode && selectedRutina?.id) {
+        await axios.put(`http://localhost:8080/rutinas/${selectedRutina.id}`, rutina);
+        alert("Rutina actualizada con éxito");
+      } else {
+        await axios.post("http://localhost:8080/rutinas", rutina);
+        alert("Rutina creada con éxito");
+      }
+      
+      // Actualizar lista de rutinas
+      await fetchRutinas();
+      handleCloseFormModal();
+    } catch (error: any) {
+      console.error("Error al guardar la rutina:", error);
+      
+      let errorMsg = "Error al guardar la rutina";
+      
+      // Intentar obtener un mensaje de error más específico
+      if (error.response?.data?.debugMessage) {
+        if (error.response.data.debugMessage.includes("TransientObjectException")) {
+          errorMsg = "Error: Problema con la referencia al cliente. Por favor, cierra sesión y vuelve a intentarlo.";
+        } else {
+          errorMsg = `Error: ${error.response.data.message}`;
+        }
+      } else if (error.message) {
+        errorMsg = `Error: ${error.message}`;
+      }
+      
+      alert(errorMsg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <>
-      <h1 className="list-title">Lista de Rutinas</h1>
-      <button className="btn btn-primary m-1" onClick={handleOpenModal}>
-        <CgAddR />
-      </button>
-      <button className="btn btn-primary" onClick={fetchRutinas}>
-        <LuRefreshCcw />
-      </button>
-      {/* Modal para crear o editar rutina */}
-      {showModal && (
-        <div className="modal show" style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">{editingRutina ? "Editar Rutina" : "Nueva Rutina"}</h5>
-                <button type="button" className="btn-close" onClick={handleCloseModal}></button>
-              </div>
-              <div className="modal-body">
-                <RutinaForm
-                  onSave={onSaveRutina}
-                  rutina={editingRutina} // Pasar la rutina seleccionada al formulario
-                />
+    <div className="rutinas-container">
+      <div className="rutinas-header">
+        <h1>Gestión de Rutinas</h1>
+        <div className="rutinas-controls">
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Buscar rutina..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <button 
+            className="btn-primary"
+            onClick={() => handleOpenFormModal()}
+            title="Crear Nueva Rutina"
+          >
+            <FaPlus /> Nueva Rutina
+          </button>
+          <button 
+            className="btn-secondary" 
+            onClick={fetchRutinas}
+            title="Actualizar Lista"
+          >
+            <FaSync /> Actualizar
+          </button>
+        </div>
+      </div>
+      
+      {isLoading && !showFormModal && !showViewModal ? (
+        <div className="loading-indicator">
+          <FaSpinner className="loading-spinner" />
+          <p>Cargando rutinas...</p>
+        </div>
+      ) : (
+        <div className="rutinas-list">
+          {(!filteredRutinas || filteredRutinas.length === 0) ? (
+            <div className="empty-list">
+              <p>No hay rutinas disponibles</p>
+              {searchTerm && <p>Prueba con un término de búsqueda diferente</p>}
+              <button 
+                className="btn-primary"
+                onClick={() => handleOpenFormModal()}
+              >
+                <FaPlus /> Crear Primera Rutina
+              </button>
+            </div>
+          ) : (
+            <table className="rutinas-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Días</th>
+                  <th>Ejercicios</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredRutinas.map(rutina => (
+                  <tr key={rutina.id}>
+                    <td>{rutina.nombre}</td>
+                    <td>{rutina.rutinaDias?.length || 0}</td>
+                    <td>
+                      {rutina.rutinaDias?.reduce((total: number, dia: any) => 
+                        total + (dia.rutinaEjercicios?.length || 0), 0) || 0}
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <button 
+                          className="btn-icon btn-primary" 
+                          onClick={() => handleOpenViewModal(rutina.id)}
+                          title="Ver Detalles"
+                        >
+                          <FaEye />
+                        </button>
+                        <button 
+                          className="btn-icon btn-warning"
+                          onClick={() => handleOpenFormModal(rutina)}
+                          title="Editar Rutina"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button 
+                          className="btn-icon btn-danger"
+                          onClick={() => handleDeleteRutina(rutina.id)}
+                          title="Eliminar Rutina"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
+
+      {/* Modal para crear/editar rutina */}
+      {showFormModal && (
+        <div className="modal-overlay">
+          <div className="modal-container rutina-form-modal">
+            <div className="modal-header">
+              <h2>{editMode ? "Editar Rutina" : "Crear Nueva Rutina"}</h2>
+              <button 
+                className="btn-close" 
+                onClick={handleCloseFormModal}
+                disabled={isLoading}
+              >×</button>
+            </div>
+            <div className="modal-body">
+              <RutinaForm
+                rutina={selectedRutina}
+                ejercicios={ejercicios}
+                onSave={handleSaveRutina}
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para ver detalles de la rutina */}
+      {showViewModal && selectedRutina && (
+        <div className="modal-overlay">
+          <div className="modal-container rutina-view-modal">
+            <div className="modal-header">
+              <h2>{selectedRutina.nombre}</h2>
+              <button 
+                className="btn-close" 
+                onClick={handleCloseViewModal}
+              >×</button>
+            </div>
+            <div className="modal-body">
+              <div className="rutina-details">
+                {selectedRutina.rutinaDias && selectedRutina.rutinaDias.length > 0 ? (
+                  <div className="rutina-dias">
+                    {selectedRutina.rutinaDias.map((dia, index) => (
+                      <div key={dia.id || index} className="rutina-dia">
+                        <h3 className="dia-title">{dia.nombre}</h3>
+                        
+                        {dia.rutinaEjercicios && dia.rutinaEjercicios.length > 0 ? (
+                          <table className="ejercicios-table">
+                            <thead>
+                              <tr>
+                                <th>Ejercicio</th>
+                                <th>Series</th>
+                                <th>Repeticiones</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {dia.rutinaEjercicios.map((ejercicio, ejIndex) => {
+                                // Obtener el nombre del ejercicio desde el ejercicioNombre o buscarlo en la lista
+                                const ejercicioObj = ejercicios.find(e => e.id === ejercicio.ejercicioId);
+                                const nombreEjercicio = ejercicio.ejercicioNombre || ejercicioObj?.nombre || 'Ejercicio desconocido';
+                                
+                                return (
+                                  <tr key={ejercicio.id || ejIndex}>
+                                    <td>{nombreEjercicio}</td>
+                                    <td>{ejercicio.sets}</td>
+                                    <td>{ejercicio.reps}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        ) : (
+                          <p className="no-ejercicios">No hay ejercicios asignados a este día</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="no-dias">Esta rutina no tiene días asignados</p>
+                )}
+                
+                <div className="rutina-actions">
+                  <button 
+                    className="btn-primary"
+                    onClick={() => {
+                      handleCloseViewModal();
+                      handleOpenFormModal(selectedRutina);
+                    }}
+                  >
+                    <FaEdit /> Editar Rutina
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
-      {/* Modal para ver la rutina seleccionada */}
-      {showRutinaViewModal && selectedRutina && (
-        <RutinaView rutina={selectedRutina} onClose={handleCloseRutinaViewModal} />
-      )}
-      <div className="rutina-list-container">
-        {rutinas.length === 0 ? (
-          <p>No hay rutinas disponibles</p>
-        ) : (
-          <table className="table table-dark">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Nombre</th>
-                <th scope="col">Editar</th>
-                <th scope="col">Eliminar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rutinas.map((rutina, index) => (
-                <tr key={rutina.id}>
-                  <th scope="row">{index + 1}</th>
-                  <td>
-                    <button
-                      className="btn btn-link"
-                      onClick={() => handleOpenRutinaViewModal(rutina)}
-                    >
-                      {rutina.nombre}
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-warning"
-                      onClick={() => handleEdit(rutina)}
-                    >
-                      <FaEdit />
-                    </button>
-                  </td>
-                  <td>
-                    <button
-                      className="btn btn-danger"
-                      onClick={() => handleDelete(rutina.id)}
-                    >
-                      <FaTrash />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </>
+    </div>
   );
 };
 

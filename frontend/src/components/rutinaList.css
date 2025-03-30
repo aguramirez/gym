@@ -1,0 +1,384 @@
+/* Estilos para RutinaList y RutinaForm */
+.rutinas-container {
+    padding: 20px;
+    background-color: var(--background);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  
+  .rutinas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  
+  .rutinas-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: var(--primary);
+  }
+  
+  .rutinas-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .rutinas-list {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .rutinas-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    background-color: var(--card);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  
+  .rutinas-table th {
+    background-color: var(--primary-light);
+    color: var(--text);
+    padding: 14px 16px;
+    font-weight: 500;
+  }
+  
+  .rutinas-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .rutinas-table tr:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+  
+  .rutinas-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  /* Modales específicos de rutinas */
+  .rutina-form-modal,
+  .rutina-view-modal {
+    max-width: 800px;
+    width: 90%;
+  }
+  
+  /* Detalles de rutina en el modal de vista */
+  .rutina-details {
+    padding: 10px 0;
+  }
+  
+  .rutina-dia {
+    margin-bottom: 24px;
+    background-color: var(--background);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  
+  .dia-title {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1.25rem;
+    color: var(--primary);
+    border-bottom: 1px solid var(--primary-light);
+    padding-bottom: 8px;
+  }
+  
+  .ejercicios-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    background-color: white;
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  
+  .ejercicios-table.compact th,
+  .ejercicios-table.compact td {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  
+  .ejercicios-table th {
+    background-color: var(--primary-light);
+    padding: 10px 14px;
+    text-align: left;
+    font-weight: 500;
+    color: var(--primary-dark);
+  }
+  
+  .ejercicios-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .ejercicios-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .no-ejercicios, 
+  .no-dias {
+    text-align: center;
+    color: var(--text-light);
+    padding: 20px;
+    font-style: italic;
+  }
+  
+  .rutina-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+  }
+  
+  /* Formulario de rutina */
+  .rutina-form {
+    padding: 10px 0;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .section-header h3, 
+  .section-header h4 {
+    margin: 0;
+    color: var(--primary);
+  }
+  
+  .dias-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .dia-item {
+    background-color: var(--background);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+  
+  .dia-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  
+  .dia-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--primary);
+  }
+  
+  .ejercicio-count {
+    display: inline-block;
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    margin-left: 12px;
+  }
+  
+  .dia-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+  
+  .btn-icon.sm {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+  
+  .ejercicios-preview {
+    margin-top: 10px;
+  }
+  
+  /* Formulario de día */
+  .dia-form {
+    padding: 10px 0;
+  }
+  
+  .form-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 16px;
+  }
+  
+  .form-header h3 {
+    margin: 0;
+    color: var(--primary);
+  }
+  
+  .btn-back {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: transparent;
+    border: 1px solid var(--secondary);
+    border-radius: var(--radius);
+    color: var(--secondary);
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  
+  .btn-back:hover {
+    background-color: var(--secondary);
+    color: white;
+  }
+  
+  .ejercicios-list {
+    margin-bottom: 24px;
+  }
+  
+  .ejercicio-actions {
+    display: flex;
+    gap: 6px;
+  }
+  
+  /* Formulario de ejercicio */
+  .ejercicio-form {
+    background-color: white;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--primary-light);
+  }
+  
+  .ejercicio-form h5 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    color: var(--primary);
+    font-size: 1rem;
+  }
+  
+  .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .form-row .form-group {
+    flex: 1;
+    min-width: 150px;
+  }
+  
+  .ejercicio-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  
+  .btn-primary.sm, 
+  .btn-secondary.sm {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .rutinas-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .rutinas-controls {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .form-row {
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .form-row .form-group {
+      width: 100%;
+    }
+    
+    .dia-header {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .ejercicio-count {
+      margin-left: 0;
+    }
+    
+    .ejercicio-form-actions, 
+    .dia-actions {
+      margin-top: 8px;
+    }
+    
+    .rutina-form-modal, 
+    .rutina-view-modal {
+      width: 100%;
+      max-width: none;
+      height: 100%;
+      border-radius: 0;
+      max-height: none;
+    }
+    
+    .modal-container {
+      border-radius: 0;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .rutinas-table {
+      font-size: 0.85rem;
+    }
+    
+    .ejercicios-table th, 
+    .ejercicios-table td {
+      padding: 8px;
+    }
+    
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      font-size: 0.85rem;
+    }
+    
+    .rutina-form, 
+    .dia-form {
+      padding: 0;
+    }
+    
+    .ejercicio-actions {
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .btn-icon.sm {
+      width: 28px;
+      height: 28px;
+    }
+    
+    .form-actions {
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .btn-primary, 
+    .btn-secondary {
+      width: 100%;
+      justify-content: center;
+    }
+  }

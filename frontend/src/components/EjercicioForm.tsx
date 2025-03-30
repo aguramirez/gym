@@ -1,67 +1,147 @@
-import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { FaSpinner, FaTimes, FaSave } from "react-icons/fa";
 
-export interface NuevoEjercicio {
-    id?: number
-    nombre: string;
-    video: string;
+export interface Ejercicio {
+  id?: number;
+  nombre: string;
+  video: string;
 }
 
 interface EjercicioFormProps {
-    onSave: (nuevoEjercicio: NuevoEjercicio) => void;
-    initialData: NuevoEjercicio | null;
+  onSave: (ejercicio: Ejercicio) => Promise<void>;
+  initialData: Ejercicio | null;
+  isLoading?: boolean;
+  editMode?: boolean;
 }
 
-function EjercicioForm({ onSave, initialData }: EjercicioFormProps) {
-    const [nombre, setNombre] = useState<string>(initialData?.nombre || "");
-    const [video, setLink] = useState<string>(initialData?.video || "");
+const EjercicioForm = ({ onSave, initialData, isLoading = false, editMode = false }: EjercicioFormProps) => {
+  const [nombre, setNombre] = useState("");
+  const [video, setVideo] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Inicializar formulario con datos existentes
+  useEffect(() => {
+    if (initialData) {
+      setNombre(initialData.nombre || "");
+      setVideo(initialData.video || "");
+    } else {
+      setNombre("");
+      setVideo("");
+    }
+  }, [initialData]);
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+  // Validación del formulario
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    let isValid = true;
+
+    if (!nombre.trim()) {
+      newErrors.nombre = "El nombre del ejercicio es obligatorio";
+      isValid = false;
+    }
+
+    // Validación básica de URL para el video
+    if (video.trim() && !isValidUrl(video)) {
+      newErrors.video = "La URL del video no es válida";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  // Función para validar URL
+  const isValidUrl = (url: string) => {
+    try {
+      new URL(url);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // Manejador del envío del formulario
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-        const nuevoEjercicio: NuevoEjercicio = { nombre, video };
+    if (!validate()) return;
     
-        try {
-            const response = await axios.post("http://localhost:8080/ejercicios", nuevoEjercicio);
-            onSave(response.data); // Notificar al componente padre con el ejercicio guardado
-            setNombre("");
-            setLink("");
-        } catch (error) {
-            console.error("Error al guardar el ejercicio:", error);
-        }
+    // Crear objeto con los datos del ejercicio
+    const ejercicioData: Ejercicio = {
+      nombre,
+      video
     };
+    
+    // Si estamos en modo edición, incluir el ID
+    if (editMode && initialData?.id) {
+      ejercicioData.id = initialData.id;
+    }
+    
+    await onSave(ejercicioData);
+  };
 
-    return (
-        <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-                <label htmlFor="nombre" className="form-label">Nombre ejercicio</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    id="nombre"
-                    placeholder="press banca"
-                    value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
-                    required
-                />
-            </div>
-            <div className="mb-3">
-                <label htmlFor="link" className="form-label">Link video</label>
-                <input
-                    type="text"
-                    className="form-control"
-                    id="video"
-                    placeholder="youtube.com"
-                    value={video}
-                    onChange={(e) => setLink(e.target.value)}
-                    required
-                />
-            </div>
-            <button type="submit" className="btn btn-primary">
-                {initialData ? "Actualizar Ejercicio" : "Guardar Ejercicio"}
-            </button>
-        </form>
-    );
-}
+  return (
+    <form onSubmit={handleSubmit} className="form">
+      <div className="form-group">
+        <label htmlFor="nombre">Nombre del ejercicio</label>
+        <input
+          id="nombre"
+          type="text"
+          className={`form-control ${errors.nombre ? 'error' : ''}`}
+          placeholder="Ej. Press banca"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          disabled={isLoading}
+          required
+        />
+        {errors.nombre && <div className="error-message">{errors.nombre}</div>}
+      </div>
+      
+      <div className="form-group">
+        <label htmlFor="video">URL del video (opcional)</label>
+        <input
+          id="video"
+          type="text"
+          className={`form-control ${errors.video ? 'error' : ''}`}
+          placeholder="https://www.youtube.com/watch?v=..."
+          value={video}
+          onChange={(e) => setVideo(e.target.value)}
+          disabled={isLoading}
+        />
+        {errors.video && <div className="error-message">{errors.video}</div>}
+        <div className="info-message">
+          Admite videos de YouTube, YouTube Shorts e Instagram
+        </div>
+      </div>
+      
+      <div className="form-actions">
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => window.history.back()}
+          disabled={isLoading}
+        >
+          <FaTimes /> Cancelar
+        </button>
+        <button
+          type="submit"
+          className="btn-primary"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <FaSpinner className="loading-spinner" /> 
+              {editMode ? "Guardando..." : "Creando..."}
+            </>
+          ) : (
+            <>
+              <FaSave /> {editMode ? "Guardar Cambios" : "Crear Ejercicio"}
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+  );
+};
 
 export default EjercicioForm;
