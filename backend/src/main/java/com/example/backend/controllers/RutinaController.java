@@ -3,6 +3,9 @@ package com.example.backend.controllers;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,49 +15,63 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.dto.RutinaDTO;
+import com.example.backend.exceptions.ResourceNotFoundException;
+import com.example.backend.mappers.RutinaMapper;
 import com.example.backend.models.entity.Rutina;
-import com.example.backend.models.entity.RutinaDia;
-import com.example.backend.models.entity.RutinaEjercicio;
 import com.example.backend.services.RutinaService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/rutinas")
+@PreAuthorize("hasRole('ADMIN') or hasRole('TRAINER')")
 public class RutinaController {
+    
     @Autowired
     private RutinaService rutinaService;
+    
+    @Autowired
+    private RutinaMapper rutinaMapper;
 
     @GetMapping
-    public List<Rutina> findAll() {
-        return rutinaService.findAll();
+    public ResponseEntity<List<RutinaDTO>> findAll() {
+        return ResponseEntity.ok(rutinaMapper.toDTOList(rutinaService.findAll()));
     }
 
     @GetMapping("/{id}")
-    public Rutina findById(@PathVariable Long id) {
-        return rutinaService.findById(id);
+    public ResponseEntity<RutinaDTO> findById(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(rutinaMapper.toDTO(rutinaService.findById(id)));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
-    public Rutina save(@RequestBody Rutina rutina) {
-        if (rutina.getRutinaDias() != null) {
-        for (RutinaDia dia : rutina.getRutinaDias()) {
-            dia.setRutina(rutina); // Asignar la rutina a cada día
-            if (dia.getRutinaEjercicios() != null) {
-                for (RutinaEjercicio ejercicio : dia.getRutinaEjercicios()) {
-                    ejercicio.setRutinaDia(dia); // Asignar el día a cada ejercicio
-                }
-            }
-        }
-    }
-        return rutinaService.save(rutina);
+    public ResponseEntity<RutinaDTO> save(@Valid @RequestBody RutinaDTO rutinaDTO) {
+        Rutina rutina = rutinaMapper.toEntity(rutinaDTO);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(rutinaMapper.toDTO(rutinaService.save(rutina)));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable Long id) {
-        rutinaService.deleteById(id);
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        try {
+            rutinaService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/{id}")
-    public Rutina editarRutina(@PathVariable Long id, @RequestBody Rutina rutinaActualizada) {
-        return rutinaService.editarRutina(id, rutinaActualizada);
+    public ResponseEntity<RutinaDTO> editarRutina(@PathVariable Long id, @Valid @RequestBody RutinaDTO rutinaDTO) {
+        try {
+            Rutina rutina = rutinaMapper.toEntity(rutinaDTO);
+            return ResponseEntity.ok(rutinaMapper.toDTO(rutinaService.editarRutina(id, rutina)));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
