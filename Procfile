@@ -1,1 +1,1 @@
-web: java -jar target/demo-0.0.1-SNAPSHOT.jar --server.port=$PORT
+web: cd backend && java -jar target/demo-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod

@@ -1,7 +1,7 @@
 {
     "build": {
       "builder": "nixpacks",
-      "buildCommand": "chmod +x ./backend/mvnw && cd backend && ./mvnw clean package -DskipTests",
+      "buildCommand": "cd backend && mvn clean package -DskipTests",
       "watchPatterns": ["backend/**"]
     },
     "deploy": {
