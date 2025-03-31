@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaUsers, FaList, FaDumbbell, FaSignOutAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import './Dashboard.css';
+import './dashboard.css';
 import ClienteList from './ClienteList';
 import EjercicioList from './EjercicioList';
 import RutinaList from './RutinaList';
