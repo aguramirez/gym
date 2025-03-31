@@ -72,7 +72,7 @@ const Login = () => {
     setError(null);
 
     try {
-      const response = await authService.login({ nombre, dni });
+      const response = await authService.login( nombre, dni );
       console.log("Respuesta de login:", response);
 
       // Muestra la pantalla de carga antes de redirigir

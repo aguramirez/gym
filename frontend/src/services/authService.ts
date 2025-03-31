@@ -44,7 +44,6 @@ const authService = {
           nombre: response.data.nombre,
           rol: response.data.rol
         }));
-        console.log('Login exitoso, token guardado');
       }
       return response.data;
     } catch (error) {
