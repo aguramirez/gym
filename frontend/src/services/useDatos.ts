@@ -1,6 +1,6 @@
 // src/services/useDatos.ts
 import { useState, useEffect, useCallback } from "react";
-import api from "./api"; // Importar la instancia por defecto en lugar de las APIs específicas
+import api from "./api"; // Importar la instancia por defecto
 import { config } from "../config/api.config";
 
 // Interfaces básicas para los tipos de datos
@@ -372,3 +372,14 @@ export const useClienteRutinas = () => {
     actualizarEjercicio
   };
 };
+
+// Exportamos todos los hooks individualmente
+const useDatos = {
+  useClientes,
+  useEjercicios,
+  useRutinas,
+  useClienteRutinas
+};
+
+// Exportación por defecto para compatibilidad con el código existente
+export default useDatos;
