@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { FaSpinner, FaTimes, FaSave } from "react-icons/fa";
+import authService from "../services/authService";
 
 // Definimos la interfaz Cliente
 export interface Cliente {
@@ -30,6 +31,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
   const [telefono, setTelefono] = useState("");
   const [rol, setRol] = useState("USER");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [canEditDni, setCanEditDni] = useState(false);
 
   useEffect(() => {
     if (cliente) {
@@ -38,6 +40,12 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
       setTelefono(cliente.telefono || "");
       setRol(cliente.rol || "USER");
     }
+    
+    // Verificar si el usuario actual tiene permiso para editar DNI (ADMIN o TRAINER)
+    const currentUser = authService.getCurrentUser();
+    const hasPermission = currentUser ? 
+      (currentUser.rol === "ADMIN" || currentUser.rol === "TRAINER") : false;
+    setCanEditDni(hasPermission);
   }, [cliente]);
 
   const validate = () => {
@@ -51,16 +59,14 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
 
     if (!dni.trim()) {
       newErrors.dni = "El DNI es obligatorio";
-    } else if (!/^\d{8}$/.test(dni)) {
-      newErrors.dni = "El DNI debe tener exactamente 8 dígitos";
       isValid = false;
     }
 
     if (!telefono.trim()) {
       newErrors.telefono = "El teléfono es obligatorio";
       isValid = false;
-    } else if (!/^\d{9}$/.test(telefono)) {
-      newErrors.telefono = "El teléfono debe tener exactamente 9 dígitos";
+    } else if (!/^\d{1,15}$/.test(telefono)) {
+      newErrors.telefono = "El teléfono debe tener solo dígitos (máximo 15)";
       isValid = false;
     }
 
@@ -116,16 +122,15 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
               id="dni"
               type="text"
               className={`form-control ${errors.dni ? 'error' : ''}`}
-              placeholder="Ingrese DNI (8 dígitos)"
+              placeholder="Ingrese DNI"
               value={dni}
-              onChange={(e) => setDni(e.target.value.replace(/\D/g, '').slice(0, 8))}
-              disabled={isLoading || (editMode && !!cliente?.id)}
-              maxLength={8}
+              onChange={(e) => setDni(e.target.value)}
+              disabled={isLoading || (editMode && !canEditDni)}
               required
             />
             {errors.dni && <div className="error-message">{errors.dni}</div>}
-            {editMode && !!cliente?.id && (
-              <div className="info-message">El DNI no se puede modificar</div>
+            {editMode && !canEditDni && (
+              <div className="info-message">Solo ADMIN pueden modificar el DNI</div>
             )}
           </div>
           
@@ -135,11 +140,10 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
               id="telefono"
               type="text"
               className={`form-control ${errors.telefono ? 'error' : ''}`}
-              placeholder="Ingrese teléfono (9 dígitos)"
+              placeholder="Ingrese teléfono"
               value={telefono}
-              onChange={(e) => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 9))}
+              onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ''))}
               disabled={isLoading}
-              maxLength={9}
               required
             />
             {errors.telefono && <div className="error-message">{errors.telefono}</div>}
@@ -155,7 +159,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
               disabled={isLoading}
             >
               <option value="USER">Usuario</option>
-              <option value="TRAINER">Entrenador</option>
+              {/* <option value="TRAINER">Entrenador</option> */}
               <option value="ADMIN">Administrador</option>
             </select>
             <div className="info-message">

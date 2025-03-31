@@ -26,6 +26,13 @@ interface ClienteRutina {
   rutinaId: number;
 }
 
+// Función para verificar si un cliente es un usuario protegido
+const isProtectedUser = (cliente: Cliente): boolean => {
+  // Lista de DNIs de usuarios protegidos (mantener sincronizado con backend)
+  const protectedDnis = ["41731091", "1"];
+  return protectedDnis.includes(cliente.dni);
+};
+
 const ClienteList = () => {
   const { clientes, rutinas, fetchClientes } = useDatos() as {
     clientes: Cliente[] | null;
@@ -48,17 +55,20 @@ const ClienteList = () => {
   // Filtrar clientes cuando cambia el término de búsqueda
   useEffect(() => {
     if (!clientes) return;
-    
+
+    // Primero filtramos los usuarios protegidos de la lista
+    const visibleClientes = clientes.filter(cliente => !isProtectedUser(cliente));
+
     if (!searchTerm.trim()) {
-      setFilteredClientes(clientes);
+      setFilteredClientes(visibleClientes);
       return;
     }
-    
-    const filtered = clientes.filter(cliente => 
+
+    const filtered = visibleClientes.filter(cliente =>
       cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cliente.dni.includes(searchTerm)
     );
-    
+
     setFilteredClientes(filtered);
   }, [searchTerm, clientes]);
 
@@ -67,19 +77,19 @@ const ClienteList = () => {
     try {
       setIsLoading(true);
       setErrorMessage(null);
-      
+
       console.log(`Obteniendo rutinas para el cliente ID: ${clienteId}`);
-      
+
       // Intentemos directamente con el endpoint de clientes/rutinas que parece estar funcionando
       try {
         console.log(`Intentando obtener desde /clientes/${clienteId}/rutinas`);
         const clienteResponse = await axios.get<any>(
           `http://localhost:8080/clientes/${clienteId}/rutinas`
         );
-        
+
         if (Array.isArray(clienteResponse.data)) {
           console.log("Rutinas obtenidas desde /clientes endpoint:", clienteResponse.data);
-          
+
           if (clienteResponse.data.length === 0) {
             console.log("El cliente no tiene rutinas asignadas");
             setClienteRutinas([]);
@@ -91,7 +101,7 @@ const ClienteList = () => {
               nombre: rutina.nombre || "Rutina sin nombre",
               rutinaId: rutina.id || 0
             }));
-            
+
             setClienteRutinas(rutinasFormateadas);
           }
         } else {
@@ -101,7 +111,7 @@ const ClienteList = () => {
         }
       } catch (clienteError: any) {
         console.error("Error al obtener rutinas desde /clientes endpoint:", clienteError);
-        
+
         // Intentamos con el segundo endpoint como fallback
         try {
           console.log(`Intentando obtener desde /cliente-rutinas/rutinas?clienteId=${clienteId}`);
@@ -109,7 +119,7 @@ const ClienteList = () => {
             `http://localhost:8080/cliente-rutinas/rutinas`,
             { params: { clienteId } }
           );
-          
+
           if (Array.isArray(response.data)) {
             console.log("Rutinas obtenidas desde /cliente-rutinas endpoint:", response.data);
             setClienteRutinas(response.data);
@@ -121,7 +131,7 @@ const ClienteList = () => {
         } catch (rutinasError: any) {
           console.error("Error también en cliente-rutinas endpoint:", rutinasError);
           setClienteRutinas([]);
-          
+
           // El cliente existe pero no tiene rutinas (inferimos esto del flujo de la app)
           if (clienteError.response?.status === 404) {
             // No establecemos mensaje de error, simplemente no hay rutinas
@@ -146,7 +156,7 @@ const ClienteList = () => {
     setClienteRutinas([]); // Resetear las rutinas
     setSelectedRutina("");
     setErrorMessage(null);
-    
+
     if (cliente && cliente.id) {
       fetchRutinasDeCliente(cliente.id);
     }
@@ -176,7 +186,7 @@ const ClienteList = () => {
   const handleSaveCliente = async (cliente: Omit<Cliente, "id">, id?: number) => {
     try {
       setIsLoading(true);
-      
+
       // Si hay ID, es una actualización, si no, es creación
       if (id) {
         await axios.put(`http://localhost:8080/clientes/${id}`, cliente);
@@ -186,9 +196,9 @@ const ClienteList = () => {
           rol: cliente.rol || "USER" // Rol predeterminado
         });
       }
-      
+
       await fetchClientes();
-      
+
       handleCloseFormModal();
       alert(id ? "Cliente actualizado exitosamente" : "Cliente creado exitosamente");
     } catch (error: any) {
@@ -201,7 +211,7 @@ const ClienteList = () => {
 
   const handleDeleteCliente = async (id: number) => {
     if (!confirm("¿Estás seguro de que deseas eliminar este cliente?")) return;
-    
+
     try {
       setIsLoading(true);
       await axios.delete(`http://localhost:8080/clientes/${id}`);
@@ -209,7 +219,13 @@ const ClienteList = () => {
       alert("Cliente eliminado exitosamente");
     } catch (error: any) {
       console.error("Error al eliminar cliente:", error);
-      alert(`Error: ${error.response?.data || error.message}`);
+
+      // Mostrar mensaje especial si el cliente está protegido
+      if (error.response?.data?.message && error.response.data.message.includes("protegido")) {
+        alert("Este usuario está protegido y no puede ser eliminado");
+      } else {
+        alert(`Error: ${error.response?.data || error.message}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -221,12 +237,12 @@ const ClienteList = () => {
     try {
       setAsignando(true);
       setErrorMessage(null);
-      
+
       // Convertir el ID a número para asegurarnos de que coincide con lo esperado por el backend
       const rutinaId = parseInt(selectedRutina, 10);
-      
+
       console.log(`Asignando rutina ${rutinaId} al cliente ${selectedCliente.id}`);
-      
+
       await axios.post("http://localhost:8080/cliente-rutinas/asignar", null, {
         params: {
           clienteId: selectedCliente.id,
@@ -237,15 +253,15 @@ const ClienteList = () => {
       // Actualizar la lista de rutinas después de asignar
       await fetchRutinasDeCliente(selectedCliente.id);
       alert("Rutina asignada con éxito");
-      
+
       // Limpiar selección
       setSelectedRutina("");
     } catch (error: any) {
       console.error("Error al asignar rutina:", error);
-      
+
       // Mejorar el manejo de errores para evitar el error de "includes is not a function"
       let errorMsg = "Error al asignar rutina";
-      
+
       if (error.response) {
         // Verificamos el tipo de datos que contiene error.response.data
         if (typeof error.response.data === 'string') {
@@ -268,7 +284,7 @@ const ClienteList = () => {
       } else if (error.message) {
         errorMsg = error.message;
       }
-      
+
       setErrorMessage(errorMsg);
     } finally {
       setAsignando(false);
@@ -277,15 +293,15 @@ const ClienteList = () => {
 
   const handleDesasignarRutina = async (rutinaId: number) => {
     if (!selectedCliente) return;
-    
+
     if (!confirm("¿Estás seguro de que deseas desasignar esta rutina?")) return;
 
     try {
       setIsLoading(true);
       setErrorMessage(null);
-      
+
       console.log(`Desasignando rutina ${rutinaId} del cliente ${selectedCliente.id}`);
-      
+
       await axios.delete("http://localhost:8080/cliente-rutinas/desasignar", {
         params: {
           clienteId: selectedCliente.id,
@@ -297,10 +313,10 @@ const ClienteList = () => {
       alert("Rutina desasignada con éxito");
     } catch (error: any) {
       console.error("Error al desasignar rutina:", error);
-      
+
       // Aplicamos el mismo patrón de manejo de errores mejorado
       let errorMsg = "Error al desasignar rutina";
-      
+
       if (error.response) {
         if (typeof error.response.data === 'string') {
           errorMsg = error.response.data;
@@ -314,7 +330,7 @@ const ClienteList = () => {
       } else if (error.message) {
         errorMsg = error.message;
       }
-      
+
       setErrorMessage(errorMsg);
     } finally {
       setIsLoading(false);
@@ -334,15 +350,15 @@ const ClienteList = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button 
+          <button
             className="btn-primary"
             onClick={() => handleOpenFormModal(null)}
             title="Agregar Nuevo Cliente"
           >
             <FaUserPlus /> Nuevo Cliente
           </button>
-          <button 
-            className="btn-secondary" 
+          <button
+            className="btn-secondary"
             onClick={() => fetchClientes()}
             title="Actualizar Lista"
           >
@@ -350,7 +366,7 @@ const ClienteList = () => {
           </button>
         </div>
       </div>
-      
+
       {isLoading && !showModal && !showFormModal ? (
         <div className="loading-indicator">
           <FaSpinner className="loading-spinner" />
@@ -381,30 +397,29 @@ const ClienteList = () => {
                     <td>{cliente.dni}</td>
                     <td>{cliente.telefono}</td>
                     <td>
-                      <span className={`badge ${
-                        cliente.rol === "ADMIN" ? "admin" : 
-                        cliente.rol === "TRAINER" ? "trainer" : "user"
-                      }`}>
+                      <span className={`badge ${cliente.rol === "ADMIN" ? "admin" :
+                          cliente.rol === "TRAINER" ? "trainer" : "user"
+                        }`}>
                         {cliente.rol || "USER"}
                       </span>
                     </td>
                     <td>
                       <div className="action-buttons">
-                        <button 
-                          className="btn-icon btn-primary" 
+                        <button
+                          className="btn-icon btn-primary"
                           onClick={() => handleOpenModal(cliente)}
                           title="Ver Rutinas"
                         >
                           <MdAssignmentAdd />
                         </button>
-                        <button 
+                        <button
                           className="btn-icon btn-warning"
                           onClick={() => handleOpenFormModal(cliente)}
                           title="Editar Cliente"
                         >
                           <FaEdit />
                         </button>
-                        <button 
+                        <button
                           className="btn-icon btn-danger"
                           onClick={() => handleDeleteCliente(cliente.id)}
                           title="Eliminar Cliente"
@@ -427,8 +442,8 @@ const ClienteList = () => {
           <div className="modal-container">
             <div className="modal-header">
               <h2>Rutinas de {selectedCliente.nombre}</h2>
-              <button 
-                className="btn-close" 
+              <button
+                className="btn-close"
                 onClick={handleCloseModal}
               >×</button>
             </div>
@@ -438,7 +453,7 @@ const ClienteList = () => {
                 <p><strong>Teléfono:</strong> {selectedCliente.telefono}</p>
                 <p><strong>Rol:</strong> {selectedCliente.rol || "USER"}</p>
               </div>
-              
+
               <h3>Rutinas Asignadas</h3>
               {isLoading ? (
                 <div className="loading-indicator small">
@@ -454,7 +469,7 @@ const ClienteList = () => {
                   {clienteRutinas.map(rutina => (
                     <div key={rutina.id} className="rutina-asignada-item">
                       <span>{rutina.nombre}</span>
-                      <button 
+                      <button
                         className="btn-danger sm"
                         onClick={() => handleDesasignarRutina(rutina.rutinaId)}
                         disabled={isLoading}
