@@ -3,15 +3,22 @@ package com.example.backend.services;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.backend.config.ProtectedUsersConfig;
+import com.example.backend.exceptions.BusinessLogicException;
 import com.example.backend.exceptions.ResourceNotFoundException;
+import com.example.backend.models.entity.Cliente;
+import com.example.backend.models.entity.ClienteRutina;
 import com.example.backend.models.entity.Rutina;
 import com.example.backend.models.entity.RutinaDia;
 import com.example.backend.models.entity.RutinaEjercicio;
+import com.example.backend.repositories.ClienteRutinaRepository;
 import com.example.backend.repositories.RutinaRepository;
 import com.example.backend.repositories.RutinaEjercicioRepository;
 import org.hibernate.Hibernate;
@@ -24,6 +31,15 @@ public class RutinaService {
     
     @Autowired
     private RutinaEjercicioRepository rutinaEjercicioRepository;
+    
+    @Autowired
+    private ClienteRutinaRepository clienteRutinaRepository;
+    
+    @Autowired
+    private ProtectedUsersConfig protectedUsersConfig;
+    
+    @Autowired
+    private ClienteRutinaService clienteRutinaService;
 
     @Transactional(readOnly = true)
     public List<Rutina> findAll() {
@@ -77,6 +93,44 @@ public class RutinaService {
         if (!rutinaRepository.existsById(id)) {
             throw new ResourceNotFoundException("Rutina no encontrada con ID: " + id);
         }
+        
+        // Obtener todas las asignaciones de esta rutina a clientes
+        List<ClienteRutina> clienteRutinas = clienteRutinaRepository.findByRutinaId(id);
+        
+        if (!clienteRutinas.isEmpty()) {
+            // Verificar si la rutina está asignada SOLO al usuario fantasma o a otros usuarios también
+            boolean assignedToRealUsers = false;
+            List<ClienteRutina> ghostAssignments = new ArrayList<>();
+            
+            for (ClienteRutina cr : clienteRutinas) {
+                Cliente cliente = cr.getCliente();
+                // Verificar si es el usuario fantasma (dni = "1")
+                if (cliente != null && "1".equals(cliente.getDni())) {
+                    ghostAssignments.add(cr);
+                } else {
+                    assignedToRealUsers = true;
+                    break;
+                }
+            }
+            
+            if (assignedToRealUsers) {
+                // Si está asignada a usuarios reales, no permitir eliminar
+                throw new DataIntegrityViolationException(
+                    "No se puede eliminar la rutina porque está asignada a uno o más clientes"
+                );
+            } else {
+                // Si solo está asignada al usuario fantasma, eliminar esas asignaciones primero
+                for (ClienteRutina ghostCR : ghostAssignments) {
+                    try {
+                        clienteRutinaService.eliminarRelacion(ghostCR.getCliente().getId(), id);
+                    } catch (Exception e) {
+                        System.err.println("Error al eliminar asignación fantasma: " + e.getMessage());
+                    }
+                }
+            }
+        }
+        
+        // Ahora podemos eliminar la rutina
         rutinaRepository.deleteById(id);
     }
 

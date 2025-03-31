@@ -20,10 +20,12 @@ public class ClienteDTO {
     private String nombre;
     
     @NotBlank(message = "El DNI es obligatorio")
+    // Eliminamos la validación de patrón estricto para permitir mayor flexibilidad
     private String dni;
     
     @NotBlank(message = "El teléfono es obligatorio")
-    @Pattern(regexp = "^[0-9]{9}$", message = "El teléfono debe tener 9 dígitos")
+    // Modificamos el patrón para ser más flexible (hasta 15 dígitos)
+    @Pattern(regexp = "^[0-9]{1,15}$", message = "El teléfono debe contener solo dígitos (máximo 15)")
     private String telefono;
     
     private String rol;

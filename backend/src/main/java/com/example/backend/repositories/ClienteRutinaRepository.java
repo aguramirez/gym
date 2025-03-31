@@ -17,8 +17,14 @@ public interface ClienteRutinaRepository extends JpaRepository<ClienteRutina, Lo
     );
 
     boolean existsByClienteIdAndRutinaId(Long clienteId, Long rutinaId);
+    
+    // Nuevo método para verificar si un cliente tiene alguna rutina asignada
+    boolean existsByClienteId(Long clienteId);
 
     List<ClienteRutina> findByClienteId(Long clienteId);
+    
+    // Método para encontrar todas las asignaciones para una rutina específica
+    List<ClienteRutina> findByRutinaId(Long rutinaId);
     
     // Consulta optimizada para cargar la rutina del cliente con sus días y ejercicios
     @Query("SELECT cr FROM ClienteRutina cr " + 

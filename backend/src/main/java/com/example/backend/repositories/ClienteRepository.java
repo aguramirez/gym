@@ -14,7 +14,11 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     Optional<Cliente> findByNombreAndDni(String nombre, String dni);
     
+    // Este método ya existía, pero mantenemos como Optional para autenticación
     Optional<Cliente> findByDni(String dni);
+    
+    // Agregamos este método para manejar el caso de múltiples usuarios con el mismo DNI
+    List<Cliente> findByDniContaining(String dni);
     
     // Consulta optimizada para cargar el cliente con sus rutinas en una sola operación
     @Query("SELECT c FROM Cliente c LEFT JOIN FETCH c.clienteRutinas WHERE c.id = :id")
