@@ -1,13 +1,13 @@
 {
-    "build": {
-      "builder": "nixpacks",
-      "buildCommand": "cd backend && mvn clean package -DskipTests",
-      "watchPatterns": ["backend/**"]
-    },
-    "deploy": {
-      "startCommand": "cd backend && java -jar target/demo-0.0.1-SNAPSHOT.jar",
-      "healthcheckPath": "/",
-      "healthcheckTimeout": 300,
-      "restartPolicyType": "on_failure"
-    }
+  "build": {
+    "builder": "nixpacks",
+    "buildCommand": "cd backend && mvn clean package -DskipTests",
+    "watchPatterns": ["backend/**"]
+  },
+  "deploy": {
+    "startCommand": "cd backend && java -jar target/demo-0.0.1-SNAPSHOT.jar",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "on_failure"
   }
+}
