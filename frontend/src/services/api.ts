@@ -46,4 +46,51 @@ api.interceptors.response.use(
   }
 );
 
+// API para clientes
+export const clienteAPI = {
+  getAll: () => api.get(`${config.CLIENTES_ENDPOINT}`),
+  getById: (id: number) => api.get(`${config.CLIENTES_ENDPOINT}/${id}`),
+  create: (cliente: any) => api.post(`${config.CLIENTES_ENDPOINT}`, cliente),
+  update: (id: number, cliente: any) => api.put(`${config.CLIENTES_ENDPOINT}/${id}`, cliente),
+  delete: (id: number) => api.delete(`${config.CLIENTES_ENDPOINT}/${id}`),
+  search: (query: string) => api.get(`${config.CLIENTES_ENDPOINT}/search?nombre=${query}&dni=${query}`),
+  getRutinas: (clienteId: number) => api.get(`${config.CLIENTES_ENDPOINT}/${clienteId}/rutinas`)
+};
+
+// API para ejercicios
+export const ejercicioAPI = {
+  getAll: () => api.get(`${config.EJERCICIOS_ENDPOINT}`),
+  getById: (id: number) => api.get(`${config.EJERCICIOS_ENDPOINT}/${id}`),
+  create: (ejercicio: any) => api.post(`${config.EJERCICIOS_ENDPOINT}`, ejercicio),
+  update: (id: number, ejercicio: any) => api.put(`${config.EJERCICIOS_ENDPOINT}/${id}`, ejercicio),
+  delete: (id: number) => api.delete(`${config.EJERCICIOS_ENDPOINT}/${id}`),
+  search: (nombre: string) => api.get(`${config.EJERCICIOS_ENDPOINT}/search?nombre=${nombre}`)
+};
+
+// API para rutinas
+export const rutinaAPI = {
+  getAll: () => api.get(`${config.RUTINAS_ENDPOINT}`),
+  getById: (id: number) => api.get(`${config.RUTINAS_ENDPOINT}/${id}`),
+  create: (rutina: any) => api.post(`${config.RUTINAS_ENDPOINT}`, rutina),
+  update: (id: number, rutina: any) => api.put(`${config.RUTINAS_ENDPOINT}/${id}`, rutina),
+  delete: (id: number) => api.delete(`${config.RUTINAS_ENDPOINT}/${id}`)
+};
+
+// API para cliente-rutinas
+export const clienteRutinaAPI = {
+  asignar: (clienteId: number, rutinaId: number) => 
+    api.post(`${config.CLIENTE_RUTINAS_ENDPOINT}/asignar?clienteId=${clienteId}&rutinaId=${rutinaId}`),
+  desasignar: (clienteId: number, rutinaId: number) => 
+    api.delete(`${config.CLIENTE_RUTINAS_ENDPOINT}/desasignar?clienteId=${clienteId}&rutinaId=${rutinaId}`),
+  getRutinasCliente: (clienteId: number) => 
+    api.get(`${config.CLIENTE_RUTINAS_ENDPOINT}/rutinas?clienteId=${clienteId}`),
+  getClienteRutina: (id: number) => 
+    api.get(`${config.CLIENTE_RUTINAS_ENDPOINT}/${id}`),
+  actualizarNotasEjercicio: (ejercicioId: number, notas: string) => 
+    api.put(`${config.CLIENTE_RUTINAS_ENDPOINT}/ejercicios/${ejercicioId}/notas`, notas),
+  actualizarEjercicio: (ejercicioId: number, reps: number, sets: number) => 
+    api.put(`${config.CLIENTE_RUTINAS_ENDPOINT}/ejercicios/${ejercicioId}?reps=${reps}&sets=${sets}`)
+};
+
+// Exportamos la instancia api por defecto también
 export default api;
