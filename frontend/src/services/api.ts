@@ -2,13 +2,17 @@ import axios, { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'ax
 import authService from './authService';
 
 // Configuración base de axios
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 const API = axios.create({
-  baseURL: 'http://localhost:8080',
+  baseURL: API_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   }
 });
+
+console.log('API URL:', API_URL); // Para depuración, puedes eliminar esto más tarde
 
 // Interceptor para agregar el token a todas las peticiones
 API.interceptors.request.use(
