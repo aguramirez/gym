@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import useDatos from "../services/useDatos";
-import { FaPlus, FaEdit, FaTrash, FaEye, FaSpinner, FaSync } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaEye, FaSpinner } from "react-icons/fa";
 import RutinaForm from "./RutinaForm";
 import "./rutinaList.css";
 import authService from "../services/authService"; // Importamos el servicio de autenticación
@@ -60,19 +60,8 @@ const RutinaList = () => {
     setFilteredRutinas(filtered);
   }, [searchTerm, rutinas]);
 
-  const handleOpenFormModal = (rutina: Rutina | null = null) => {
-    setSelectedRutina(rutina);
-    setEditMode(!!rutina);
-    setShowFormModal(true);
-  };
-
-  const handleCloseFormModal = () => {
-    setShowFormModal(false);
-    setSelectedRutina(null);
-    setEditMode(false);
-  };
-
-  const handleOpenViewModal = async (rutinaId: number) => {
+  // Manejador para hacer clic en una fila para ver detalles
+  const handleRowClick = async (rutinaId: number) => {
     try {
       setIsLoading(true);
       const response = await axios.get(`http://localhost:8080/rutinas/${rutinaId}`);
@@ -86,9 +75,28 @@ const RutinaList = () => {
     }
   };
 
+  const handleOpenFormModal = (rutina: Rutina | null = null) => {
+    setSelectedRutina(rutina);
+    setEditMode(!!rutina);
+    setShowFormModal(true);
+  };
+
+  const handleCloseFormModal = () => {
+    setShowFormModal(false);
+    setSelectedRutina(null);
+    setEditMode(false);
+  };
+
   const handleCloseViewModal = () => {
     setShowViewModal(false);
     setSelectedRutina(null);
+  };
+
+  // Función para abrir el formulario de edición desde el modal de detalle
+  const handleEditFromDetail = () => {
+    setShowViewModal(false);
+    setEditMode(true);
+    setShowFormModal(true);
   };
 
   const handleDeleteRutina = async (id?: number) => {
@@ -102,6 +110,7 @@ const RutinaList = () => {
       setIsLoading(true);
       await axios.delete(`http://localhost:8080/rutinas/${id}`);
       await fetchRutinas();
+      setShowViewModal(false); // Cerrar el modal de vista después de eliminar
       alert("Rutina eliminada con éxito");
     } catch (error: any) {
       console.error("Error al eliminar la rutina:", error);
@@ -184,13 +193,6 @@ const RutinaList = () => {
           >
             <FaPlus /> Nueva Rutina
           </button>
-          {/* <button 
-            className="btn-secondary" 
-            onClick={fetchRutinas}
-            title="Actualizar Lista"
-          >
-            <FaSync /> Actualizar
-          </button> */}
         </div>
       </div>
       
@@ -219,42 +221,20 @@ const RutinaList = () => {
                   <th>Nombre</th>
                   <th>Días</th>
                   <th>Ejercicios</th>
-                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {filteredRutinas.map(rutina => (
-                  <tr key={rutina.id}>
+                  <tr 
+                    key={rutina.id} 
+                    onClick={() => handleRowClick(rutina.id)}
+                    className="clickable-row"
+                  >
                     <td>{rutina.nombre}</td>
                     <td>{rutina.rutinaDias?.length || 0}</td>
                     <td>
                       {rutina.rutinaDias?.reduce((total: number, dia: any) => 
                         total + (dia.rutinaEjercicios?.length || 0), 0) || 0}
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button 
-                          className="btn-icon btn-primary" 
-                          onClick={() => handleOpenViewModal(rutina.id)}
-                          title="Ver Detalles"
-                        >
-                          <FaEye />
-                        </button>
-                        <button 
-                          className="btn-icon btn-warning"
-                          onClick={() => handleOpenFormModal(rutina)}
-                          title="Editar Rutina"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button 
-                          className="btn-icon btn-danger"
-                          onClick={() => handleDeleteRutina(rutina.id)}
-                          title="Eliminar Rutina"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
                     </td>
                   </tr>
                 ))}
@@ -342,15 +322,18 @@ const RutinaList = () => {
                   <p className="no-dias">Esta rutina no tiene días asignados</p>
                 )}
                 
-                <div className="rutina-actions">
+                <div className="detail-actions">
                   <button 
-                    className="btn-primary"
-                    onClick={() => {
-                      handleCloseViewModal();
-                      handleOpenFormModal(selectedRutina);
-                    }}
+                    className="btn-warning"
+                    onClick={handleEditFromDetail}
                   >
                     <FaEdit /> Editar Rutina
+                  </button>
+                  <button 
+                    className="btn-danger"
+                    onClick={() => handleDeleteRutina(selectedRutina.id)}
+                  >
+                    <FaTrash /> Eliminar Rutina
                   </button>
                 </div>
               </div>

@@ -1,6 +1,6 @@
 import { useState, FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash, FaUser, FaLock } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaUser, FaLock, FaWhatsapp, FaInstagram } from "react-icons/fa";
 import { BiLoaderAlt } from "react-icons/bi";
 import authService from "./services/authService";
 import LoadingScreen from "./components/LoadingScreen";
@@ -198,7 +198,9 @@ const Login = () => {
           </form>
 
           <footer className="login-footer">
-            <p>Para obtener acceso, contacte con el administrador del gimnasio</p>
+            <p>Para obtener acceso, contacte con el administrador</p>
+            {/* <FaWhatsapp />
+            <FaInstagram /> */}
           </footer>
         </div>
       </div>

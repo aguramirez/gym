@@ -51,6 +51,7 @@ const ClienteList = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredClientes, setFilteredClientes] = useState<Cliente[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
 
   // Filtrar clientes cuando cambia el término de búsqueda
   useEffect(() => {
@@ -150,15 +151,39 @@ const ClienteList = () => {
     }
   };
 
-  const handleOpenModal = (cliente: Cliente) => {
+  // Abre el modal de detalles al hacer clic en una fila
+  const handleRowClick = (cliente: Cliente) => {
     setSelectedCliente(cliente);
-    setShowModal(true);
-    setClienteRutinas([]); // Resetear las rutinas
-    setSelectedRutina("");
-    setErrorMessage(null);
+    setShowDetailModal(true);
+  };
 
-    if (cliente && cliente.id) {
-      fetchRutinasDeCliente(cliente.id);
+  // Cierra el modal de detalles
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedCliente(null);
+  };
+
+  // Inicia la edición desde el modal de detalles
+  const handleEditFromDetail = () => {
+    if (selectedCliente) {
+      setShowDetailModal(false);
+      setEditMode(true);
+      setShowFormModal(true);
+    }
+  };
+
+  // Inicia la gestión de rutinas desde el modal de detalles
+  const handleManageRutinasFromDetail = () => {
+    if (selectedCliente) {
+      setShowDetailModal(false);
+      setShowModal(true);
+      setClienteRutinas([]); // Resetear las rutinas
+      setSelectedRutina("");
+      setErrorMessage(null);
+
+      if (selectedCliente && selectedCliente.id) {
+        fetchRutinasDeCliente(selectedCliente.id);
+      }
     }
   };
 
@@ -216,6 +241,7 @@ const ClienteList = () => {
       setIsLoading(true);
       await axios.delete(`http://localhost:8080/clientes/${id}`);
       await fetchClientes();
+      setShowDetailModal(false); // Cerrar el modal de detalle tras eliminar
       alert("Cliente eliminado exitosamente");
     } catch (error: any) {
       console.error("Error al eliminar cliente:", error);
@@ -357,17 +383,10 @@ const ClienteList = () => {
           >
             <FaUserPlus /> Nuevo Cliente
           </button>
-          {/* <button
-            className="btn-secondary"
-            onClick={() => fetchClientes()}
-            title="Actualizar Lista"
-          >
-            <FaSync /> Actualizar
-          </button> */}
         </div>
       </div>
 
-      {isLoading && !showModal && !showFormModal ? (
+      {isLoading && !showModal && !showFormModal && !showDetailModal ? (
         <div className="loading-indicator">
           <FaSpinner className="loading-spinner" />
           <p>Cargando clientes...</p>
@@ -384,49 +403,23 @@ const ClienteList = () => {
               <thead>
                 <tr>
                   <th>Nombre</th>
-                  {/* <th>DNI</th>
-                  <th>Teléfono</th> */}
                   <th>Rol</th>
-                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {filteredClientes.map(cliente => (
-                  <tr key={cliente.id}>
+                  <tr 
+                    key={cliente.id} 
+                    onClick={() => handleRowClick(cliente)}
+                    className="clickable-row"
+                  >
                     <td>{cliente.nombre}</td>
-                    {/* <td>{cliente.dni}</td>
-                    <td>{cliente.telefono}</td> */}
                     <td>
                       <span className={`badge ${cliente.rol === "ADMIN" ? "admin" :
                           cliente.rol === "TRAINER" ? "trainer" : "user"
                         }`}>
                         {cliente.rol || "USER"}
                       </span>
-                    </td>
-                    <td>
-                      <div className="action-buttons">
-                        <button
-                          className="btn-icon btn-primary"
-                          onClick={() => handleOpenModal(cliente)}
-                          title="Ver Rutinas"
-                        >
-                          <MdAssignmentAdd />
-                        </button>
-                        <button
-                          className="btn-icon btn-warning"
-                          onClick={() => handleOpenFormModal(cliente)}
-                          title="Editar Cliente"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button
-                          className="btn-icon btn-danger"
-                          onClick={() => handleDeleteCliente(cliente.id)}
-                          title="Eliminar Cliente"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
                     </td>
                   </tr>
                 ))}
@@ -436,7 +429,55 @@ const ClienteList = () => {
         </div>
       )}
 
-      {/* Modal de detalles del cliente y asignación de rutinas */}
+      {/* Modal de detalles del cliente */}
+      {showDetailModal && selectedCliente && (
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <div className="modal-header">
+              <h2>{selectedCliente.nombre}</h2>
+              <button
+                className="btn-close"
+                onClick={handleCloseDetailModal}
+              >×</button>
+            </div>
+            <div className="modal-body">
+              <div className="cliente-detail">
+                {/* <h3>{selectedCliente.nombre}</h3> */}
+                <div className="cliente-info">
+                  <p><strong>DNI:</strong> {selectedCliente.dni}</p>
+                  <p><strong>Teléfono:</strong> {selectedCliente.telefono}</p>
+                  <p><strong>Rol:</strong> <span className={`badge ${selectedCliente.rol === "ADMIN" ? "admin" : selectedCliente.rol === "TRAINER" ? "trainer" : "user"}`}>
+                    {selectedCliente.rol || "USER"}
+                  </span></p>
+                </div>
+                
+                <div className="detail-actions">
+                  <button 
+                    className="btn-primary"
+                    onClick={handleManageRutinasFromDetail}
+                  >
+                    <MdAssignmentAdd /> Gestionar Rutinas
+                  </button>
+                  <button 
+                    className="btn-warning"
+                    onClick={handleEditFromDetail}
+                  >
+                    <FaEdit /> Editar Cliente
+                  </button>
+                  <button 
+                    className="btn-danger"
+                    onClick={() => handleDeleteCliente(selectedCliente.id)}
+                  >
+                    <FaTrash /> Eliminar Cliente
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de gestión de rutinas */}
       {showModal && selectedCliente && (
         <div className="modal-overlay">
           <div className="modal-container">
@@ -448,11 +489,11 @@ const ClienteList = () => {
               >×</button>
             </div>
             <div className="modal-body">
-              <div className="cliente-info">
+              {/* <div className="cliente-info">
                 <p><strong>DNI:</strong> {selectedCliente.dni}</p>
                 <p><strong>Teléfono:</strong> {selectedCliente.telefono}</p>
                 <p><strong>Rol:</strong> {selectedCliente.rol || "USER"}</p>
-              </div>
+              </div> */}
 
               <h3>Rutinas Asignadas</h3>
               {isLoading ? (

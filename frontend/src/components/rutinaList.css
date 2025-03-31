@@ -511,3 +511,131 @@
     height: 44px;
   }
 }
+
+/* Estilos para las filas clickeables y acciones de detalle */
+
+/* Agregar a clienteList.css, rutinaList.css y componentStyles.css */
+
+/* Fila clickeable */
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  position: relative;
+}
+
+.clickable-row:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.clickable-row:active {
+  transform: translateY(0);
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Efecto visual para mostrar que la fila es clickeable */
+.clickable-row::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background-color: var(--primary);
+  transition: height 0.2s ease;
+}
+
+.clickable-row:hover::after {
+  height: 2px;
+}
+
+/* Acciones en el modal de detalles */
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+  justify-content: flex-end;
+}
+
+.detail-actions button {
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+.detail-actions .btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.detail-actions .btn-warning {
+  background-color: var(--primary);
+  color: var(--accent);
+}
+
+.detail-actions .btn-danger {
+  background-color: var(--danger);
+  color: white;
+}
+
+.detail-actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.detail-actions button:active {
+  transform: translateY(0);
+}
+
+/* Estilos para detalles de cliente */
+.cliente-detail {
+  padding: 0 0 16px 0;
+}
+
+.cliente-detail h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  color: var(--primary);
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+/* Mejoras para dispositivos móviles */
+@media (max-width: 768px) {
+  .detail-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .detail-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .clickable-row td {
+    padding: 14px 12px; /* Celdas más grandes para mejor área táctil */
+  }
+  
+  /* Indicador visual de "haz clic para ver más" en móvil */
+  .data-table tbody tr.clickable-row td:last-child::after,
+  .clientes-table tbody tr.clickable-row td:last-child::after,
+  .rutinas-table tbody tr.clickable-row td:last-child::after {
+    content: '›';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    color: var(--text-light);
+    opacity: 0.5;
+  }
+}

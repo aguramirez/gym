@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { FaSignOutAlt, FaUser, FaDumbbell, FaAngleDown, FaAngleUp, FaEdit, FaSave, FaTimes } from "react-icons/fa";
+import { FaSignOutAlt, FaUser, FaDumbbell, FaAngleDown, FaAngleUp, FaEdit, FaSave, FaTimes, FaExternalLinkAlt } from "react-icons/fa";
 import { BiLoaderAlt } from "react-icons/bi";
 import authService from "../services/authService";
 import LoadingScreen from "./LoadingScreen";
@@ -304,37 +304,127 @@ const ClienteView = () => {
         }
     };
 
-    // Función para formatear enlaces de video
-    const getEmbedUrl = (url: string | undefined) => {
-        if (!url) return "";
-        
-        // YouTube normal
-        if (url.includes("youtube.com/watch")) {
-            const videoId = url.split("v=")[1]?.split("&")[0];
-            if (videoId) return `https://www.youtube.com/embed/${videoId}`;
-        }
-        
-        // YouTube Shorts
-        if (url.includes("youtube.com/shorts")) {
-            const videoId = url.split("/shorts/")[1]?.split("?")[0];
-            if (videoId) return `https://www.youtube.com/embed/${videoId}`;
-        }
-        
-        // Instagram Reels / Posts (necesita incluir /embed/ en la URL)
-        if (url.includes("instagram.com/")) {
-            if (url.includes("/p/") || url.includes("/reel/")) {
-                const parts = url.split("/");
-                const id = parts[parts.indexOf("p") + 1] || parts[parts.indexOf("reel") + 1];
-                if (id) return `https://www.instagram.com/p/${id}/embed/`;
-            }
-        }
-        
-        return url; // Si no se reconoce ningún patrón, devolver la URL original
-    };
-
     // Toggle sidebar en dispositivos móviles
     const toggleSidebar = () => {
         setSidebarVisible(!sidebarVisible);
+    };
+
+    // Componente para renderizar la sección de video
+    const VideoSection: React.FC<{ ejercicio: ClienteRutinaEjercicio }> = ({ ejercicio }) => {
+        const [videoError, setVideoError] = useState<boolean>(false);
+        const [isVideoLoading, setIsVideoLoading] = useState<boolean>(true);
+        
+        // Función para detectar tipo de video basado en la URL
+        const getVideoType = (url: string | undefined): 'youtube' | 'youtube-shorts' | 'instagram' | 'unknown' => {
+            if (!url) return 'unknown';
+            
+            if (url.includes("youtube.com/watch")) return 'youtube';
+            if (url.includes("youtube.com/shorts") || url.includes("youtu.be/")) return 'youtube-shorts';
+            if (url.includes("instagram.com/")) return 'instagram';
+            
+            return 'unknown';
+        };
+    
+        // Función para formatear enlaces de video
+        const getEmbedUrl = (url: string | undefined): string => {
+            if (!url) return "";
+            
+            // YouTube normal
+            if (url.includes("youtube.com/watch")) {
+                const videoId = url.split("v=")[1]?.split("&")[0];
+                if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+            }
+            
+            // YouTube Shorts o enlaces acortados de YouTube
+            if (url.includes("youtube.com/shorts") || url.includes("youtu.be/")) {
+                let videoId;
+                if (url.includes("youtube.com/shorts")) {
+                    videoId = url.split("/shorts/")[1]?.split("?")[0];
+                } else {
+                    videoId = url.split("youtu.be/")[1]?.split("?")[0];
+                }
+                if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+            }
+            
+            // Instagram Reels / Posts
+            if (url.includes("instagram.com/")) {
+                // Para Instagram solo devolvemos la URL original ya que mostraremos un enlace
+                return url;
+            }
+            
+            return url; // Si no se reconoce ningún patrón, devolver la URL original
+        };
+    
+        // Tipo de video actual
+        const videoType = getVideoType(ejercicio.ejercicioVideo);
+        const embedUrl = getEmbedUrl(ejercicio.ejercicioVideo);
+        const isInstagram = videoType === 'instagram';
+        const isVertical = videoType === 'youtube-shorts' || videoType === 'instagram';
+    
+        // Manejador para errores de carga de iframe
+        const handleIframeError = () => {
+            setVideoError(true);
+            setIsVideoLoading(false);
+        };
+    
+        // Manejador para cuando el iframe carga correctamente
+        const handleIframeLoad = () => {
+            setIsVideoLoading(false);
+        };
+    
+        if (!ejercicio.ejercicioVideo) {
+            return null; // No mostrar nada si no hay video
+        }
+    
+        return (
+            <div className={`video-container ${isVertical ? 'vertical' : 'horizontal'}`}>
+                {isVideoLoading && (
+                    <div className="video-loading">
+                        <div className="spinner"></div>
+                        <p>Cargando video...</p>
+                    </div>
+                )}
+                
+                {isInstagram ? (
+                    // Para Instagram mostramos un mensaje y un botón para abrir en lugar de un iframe
+                    <div className="instagram-message">
+                        <p>Para ver este reel de Instagram, haz clic aquí:</p>
+                        <a 
+                            href={ejercicio.ejercicioVideo} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="btn-accent"
+                        >
+                            Ver en Instagram <FaExternalLinkAlt size={12} />
+                        </a>
+                    </div>
+                ) : videoError ? (
+                    // Si hay error al cargar el iframe
+                    <div className="video-error">
+                        <p>No se pudo cargar el video.</p>
+                        <a 
+                            href={ejercicio.ejercicioVideo} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="btn-accent"
+                        >
+                            Ver en el sitio original <FaExternalLinkAlt size={12} />
+                        </a>
+                    </div>
+                ) : (
+                    // Mostramos el iframe normal para YouTube
+                    <iframe
+                        className={isVertical ? 'vertical-video' : 'horizontal-video'}
+                        src={embedUrl}
+                        title={ejercicio.ejercicioNombre}
+                        allowFullScreen
+                        loading="lazy"
+                        onError={handleIframeError}
+                        onLoad={handleIframeLoad}
+                    ></iframe>
+                )}
+            </div>
+        );
     };
 
     // Componente de pantalla de carga
@@ -463,17 +553,9 @@ const ClienteView = () => {
                                                         {/* Contenido del ejercicio */}
                                                         {expandedEjercicios[ejercicio.id] && (
                                                             <div className="ejercicio-content">
-                                                                {/* Video */}
+                                                                {/* Video - Componente mejorado */}
                                                                 {ejercicio.ejercicioVideo && (
-                                                                    <div className="video-container">
-                                                                        <iframe
-                                                                            src={getEmbedUrl(ejercicio.ejercicioVideo)}
-                                                                            title={ejercicio.ejercicioNombre}
-                                                                            allowFullScreen
-                                                                            frameBorder="0"
-                                                                            loading="lazy"
-                                                                        ></iframe>
-                                                                    </div>
+                                                                    <VideoSection ejercicio={ejercicio} />
                                                                 )}
 
                                                                 {/* Notas */}

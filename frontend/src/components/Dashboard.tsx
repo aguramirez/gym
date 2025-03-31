@@ -34,13 +34,13 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
-        <h1>Panel de Administración</h1>
+        <h1><FaDumbbell /></h1>
         <div className="user-section">
           <span className="user-name">
-            {authService.getCurrentUser()?.nombre || 'Usuario'}
+            Bienvenido {authService.getCurrentUser()?.nombre || 'Usuario'}!
           </span>
           <button className="logout-button" onClick={handleLogout}>
-            <FaSignOutAlt /> Cerrar Sesión
+            <FaSignOutAlt />Salir
           </button>
         </div>
       </header>

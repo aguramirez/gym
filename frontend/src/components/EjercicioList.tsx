@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import useDatos from "../services/useDatos";
-import { FaPlus, FaTrash, FaEdit, FaEye, FaSpinner, FaSync } from "react-icons/fa";
+import { FaPlus, FaTrash, FaEdit, FaSpinner } from "react-icons/fa";
 import EjercicioForm from "./EjercicioForm";
 import EjercicioView from "./EjercicioView";
 import authService from "../services/authService";
-import "./componentStyles.css"; // Asegúrate de tener un archivo de estilos común
+import "./componentStyles.css";
 
 export interface Ejercicio {
-  id?: number; // Hacemos id opcional para permitir creación de nuevos ejercicios
+  id?: number;
   nombre: string;
   video: string;
 }
@@ -50,20 +50,8 @@ const EjercicioList = () => {
     setFilteredEjercicios(filtered);
   }, [searchTerm, ejercicios]);
 
-  // Manejadores para los modales
-  const handleOpenFormModal = (ejercicio: Ejercicio | null = null) => {
-    setSelectedEjercicio(ejercicio);
-    setEditMode(!!ejercicio);
-    setShowFormModal(true);
-  };
-
-  const handleCloseFormModal = () => {
-    setShowFormModal(false);
-    setSelectedEjercicio(null);
-    setEditMode(false);
-  };
-
-  const handleOpenViewModal = async (ejercicioId?: number) => {
+  // Manejador para hacer clic en una fila y ver los detalles
+  const handleRowClick = async (ejercicioId?: number) => {
     if (!ejercicioId) {
       console.error("ID de ejercicio no válido");
       return;
@@ -86,9 +74,29 @@ const EjercicioList = () => {
     }
   };
 
+  // Manejadores para los modales
+  const handleOpenFormModal = (ejercicio: Ejercicio | null = null) => {
+    setSelectedEjercicio(ejercicio);
+    setEditMode(!!ejercicio);
+    setShowFormModal(true);
+  };
+
+  const handleCloseFormModal = () => {
+    setShowFormModal(false);
+    setSelectedEjercicio(null);
+    setEditMode(false);
+  };
+
   const handleCloseViewModal = () => {
     setShowViewModal(false);
     setSelectedEjercicio(null);
+  };
+
+  // Función para editar desde el modal de detalles
+  const handleEditFromDetail = () => {
+    setShowViewModal(false);
+    setEditMode(true);
+    setShowFormModal(true);
   };
 
   // Manejador para guardar o actualizar ejercicio
@@ -163,6 +171,7 @@ const EjercicioList = () => {
         }
       });
       await fetchEjercicios();
+      setShowViewModal(false); // Cerrar el modal de vista después de eliminar
       alert("Ejercicio eliminado con éxito");
     } catch (error: any) {
       console.error("Error al eliminar ejercicio:", error);
@@ -205,14 +214,6 @@ const EjercicioList = () => {
           >
             <FaPlus /> Nuevo Ejercicio
           </button>
-          {/* Botón para actualizar lista */}
-          {/* <button 
-            className="btn-secondary" 
-            onClick={fetchEjercicios}
-            title="Actualizar Lista"
-          >
-            <FaSync /> Actualizar
-          </button> */}
         </div>
       </div>
       
@@ -242,39 +243,17 @@ const EjercicioList = () => {
                 <tr>
                   <th>Nombre</th>
                   <th>Video</th>
-                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {filteredEjercicios.map(ejercicio => (
-                  <tr key={ejercicio.id}>
+                  <tr 
+                    key={ejercicio.id} 
+                    onClick={() => handleRowClick(ejercicio.id)}
+                    className="clickable-row"
+                  >
                     <td>{ejercicio.nombre}</td>
                     <td>{ejercicio.video ? 'Disponible' : 'No disponible'}</td>
-                    <td>
-                      <div className="action-buttons">
-                        <button 
-                          className="btn-icon btn-primary" 
-                          onClick={() => handleOpenViewModal(ejercicio.id)}
-                          title="Ver Detalles"
-                        >
-                          <FaEye />
-                        </button>
-                        <button 
-                          className="btn-icon btn-warning"
-                          onClick={() => handleOpenFormModal(ejercicio)}
-                          title="Editar Ejercicio"
-                        >
-                          <FaEdit />
-                        </button>
-                        <button 
-                          className="btn-icon btn-danger"
-                          onClick={() => handleDeleteEjercicio(ejercicio.id)}
-                          title="Eliminar Ejercicio"
-                        >
-                          <FaTrash />
-                        </button>
-                      </div>
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -323,11 +302,22 @@ const EjercicioList = () => {
               <EjercicioView 
                 ejercicio={selectedEjercicio as Required<Ejercicio>} // Asegurar que tenga id
                 onClose={handleCloseViewModal} 
-                onEdit={() => {
-                  handleCloseViewModal();
-                  handleOpenFormModal(selectedEjercicio);
-                }}
+                onEdit={handleEditFromDetail}
               />
+              <div className="detail-actions">
+                <button 
+                  className="btn-warning"
+                  onClick={handleEditFromDetail}
+                >
+                  <FaEdit /> Editar Ejercicio
+                </button>
+                <button 
+                  className="btn-danger"
+                  onClick={() => handleDeleteEjercicio(selectedEjercicio.id)}
+                >
+                  <FaTrash /> Eliminar Ejercicio
+                </button>
+              </div>
             </div>
           </div>
         </div>
