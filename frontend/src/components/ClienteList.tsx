@@ -424,7 +424,7 @@ const ClienteList = () => {
                           onClick={() => handleDeleteCliente(cliente.id)}
                           title="Eliminar Cliente"
                         >
-                          <FaEdit />
+                          <FaTrash />
                         </button>
                       </div>
                     </td>
