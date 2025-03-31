@@ -192,6 +192,7 @@
 .btn-danger {
   background-color: #dc3545;
   color: white;
+  font-size: larger;
 }
 
 .btn-danger:hover {

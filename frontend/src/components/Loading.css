@@ -66,7 +66,7 @@
 
 .loading-message {
   margin: 0;
-  color: var(--loading-text);
+  color: white;
   font-size: 1.1rem;
   font-weight: 500;
 }
@@ -106,7 +106,7 @@
 .loading-container.fullscreen .loading-logo h2 {
   font-size: 1.2rem;
   font-weight: 500;
-  color: var(--loading-accent);
+  color: white;
   margin: 0;
   letter-spacing: 8px;
   animation: fadeInUp 0.8s ease 0.2s forwards;
@@ -150,5 +150,6 @@
   
   .loading-message {
     font-size: 1rem;
+    color: white;
   }
 }
