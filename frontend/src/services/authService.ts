@@ -1,145 +1,102 @@
+// src/services/authService.ts
 import axios from 'axios';
+import { config } from '../config/api.config';
 
-// Definiciones de tipos para autenticación
-export interface AuthCredentials {
-  nombre: string;
-  dni: string;
-}
+// Crear instancia de axios con URL base desde configuración
+const apiClient = axios.create({
+  baseURL: config.AUTH_ENDPOINT,
+  headers: {
+    'Content-type': 'application/json',
+  },
+});
 
-export interface AuthResponse {
-  token: string;
-  clienteId: number;
-  nombre: string;
-  rol: string;
-}
+// Información para depuración
+console.log(`Inicializando servicio de autenticación con API URL: ${config.API_URL}`);
 
-export interface User {
-  clienteId: number;
-  nombre: string;
-  rol: string;
-}
-
-// URL base de la API
-const API_URL = 'http://localhost:8080';
-
-// Clase para manejar la autenticación
-class AuthService {
-  // Realiza la petición de login
-  async login(credentials: AuthCredentials): Promise<AuthResponse> {
-    try {
-      const response = await axios.post<AuthResponse>(
-        `${API_URL}/auth/login`, 
-        credentials
-      );
-      
-      // Guardar el token en localStorage
-      if (response.data.token) {
-        this.setSession(response.data);
-      }
-      
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Función para registrarse
-  async register(userData: { nombre: string; dni: string; telefono: string }): Promise<any> {
-    try {
-      const response = await axios.post(`${API_URL}/auth/register`, userData);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Función para cerrar sesión
-  logout(): void {
-    // Eliminar token y datos de usuario del localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('clienteId');
-    localStorage.removeItem('nombre');
-    localStorage.removeItem('rol');
-    
-    // Eliminar el header de autorización de axios
-    delete axios.defaults.headers.common['Authorization'];
-  }
-
-  // Función para guardar los datos de sesión
-  private setSession(authResponse: AuthResponse): void {
-    // Guardar el token con el prefijo "Bearer "
-    const token = authResponse.token.startsWith('Bearer ') 
-      ? authResponse.token 
-      : `Bearer ${authResponse.token}`;
-    
-    localStorage.setItem('token', token);
-    localStorage.setItem('clienteId', authResponse.clienteId.toString());
-    localStorage.setItem('nombre', authResponse.nombre);
-    localStorage.setItem('rol', authResponse.rol);
-    
-    // Configurar header de autorización para todas las peticiones
-    axios.defaults.headers.common['Authorization'] = token;
-    
-    console.log('Token guardado:', token);
-    console.log('Authorization header:', axios.defaults.headers.common['Authorization']);
-  }
-
-  // Verifica si el usuario está autenticado
-  isAuthenticated(): boolean {
+// Interceptor para agregar token a las solicitudes
+apiClient.interceptors.request.use(
+  (config) => {
     const token = localStorage.getItem('token');
-    return !!token; // Convierte a booleano
-  }
-
-  // Obtiene el token JWT
-  getToken(): string | null {
-    return localStorage.getItem('token');
-  }
-
-  // Obtiene los datos del usuario actual
-  getCurrentUser(): User | null {
-    const clienteId = localStorage.getItem('clienteId');
-    const nombre = localStorage.getItem('nombre');
-    const rol = localStorage.getItem('rol');
-    
-    if (clienteId && nombre && rol) {
-      return {
-        clienteId: parseInt(clienteId, 10),
-        nombre,
-        rol
-      };
-    }
-    
-    return null;
-  }
-
-  // Verifica si el usuario tiene un rol específico
-  hasRole(role: string): boolean {
-    const user = this.getCurrentUser();
-    
-    // Normaliza el rol para comparación
-    const userRole = user?.rol?.toUpperCase();
-    const requiredRole = role.toUpperCase();
-    
-    // Permite coincidencias parciales (ADMIN coincide con ROLE_ADMIN)
-    return user !== null && (
-      userRole === requiredRole || 
-      userRole === `ROLE_${requiredRole}` ||
-      requiredRole === `ROLE_${userRole}`
-    );
-  }
-
-  // Inicializa el servicio de autenticación (para llamar al inicio de la app)
-  initializeAuth(): void {
-    const token = this.getToken();
     if (token) {
-      // Si hay un token en localStorage, configurar el header de axios
-      axios.defaults.headers.common['Authorization'] = token;
-      console.log('Inicializando auth con token:', token);
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log('Token agregado a la solicitud');
+    } else {
+      console.log('No hay token disponible');
     }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
   }
-}
+);
 
-// Crear una instancia del servicio
-const authService = new AuthService();
+// Objeto del servicio
+const authService = {
+  // Login
+  login: async (nombre: string, dni: string) => {
+    try {
+      console.log(`Intentando login en: ${config.AUTH_ENDPOINT}/login con:`, { nombre, dni });
+      const response = await apiClient.post('/login', { nombre, dni });
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify({
+          id: response.data.clienteId,
+          nombre: response.data.nombre,
+          rol: response.data.rol
+        }));
+        console.log('Login exitoso, token guardado');
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Error de login:', error);
+      throw error;
+    }
+  },
+
+  // Logout
+  logout: () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    console.log('Logout realizado, token eliminado');
+  },
+
+  // Registro
+  register: async (userData: any) => {
+    try {
+      console.log(`Intentando registro en: ${config.AUTH_ENDPOINT}/register`);
+      return await apiClient.post('/register', userData);
+    } catch (error) {
+      console.error('Error de registro:', error);
+      throw error;
+    }
+  },
+
+  // Get token (nuevo método)
+  getToken: () => {
+    return localStorage.getItem('token');
+  },
+
+  // Get current user
+  getCurrentUser: () => {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      return JSON.parse(userStr);
+    }
+    return null;
+  },
+
+  // Check if user is logged in
+  isLoggedIn: () => {
+    const token = localStorage.getItem('token');
+    console.log('Token en localStorage:', token ? 'Presente' : 'Ausente');
+    return !!token;
+  },
+
+  // Check if user has specific role
+  hasRole: (role: string) => {
+    const user = authService.getCurrentUser();
+    return user && user.rol === role;
+  }
+};
 
 export default authService;
