@@ -1,84 +1,154 @@
 :root {
-    --loading-primary: #3f51b5;
-    --loading-background: rgba(255, 255, 255, 0.9);
-    --loading-text: #333;
+  --loading-primary: #22263A;
+  --loading-accent: #D3FF00;
+  --loading-background: rgba(255, 255, 255, 0.95);
+  --loading-text: #333;
+  --loading-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  --loading-radius: 12px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  border-radius: var(--loading-radius);
+  background-color: var(--loading-background);
+  box-shadow: var(--loading-shadow);
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.loading-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100vh;
+  max-width: none;
+  border-radius: 0;
+  background-color: var(--loading-primary);
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+.spinner-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+  color: var(--loading-accent);
+}
+
+.loading-container.fullscreen .loading-spinner {
+  color: var(--loading-accent);
+}
+
+.loading-spinner.small {
+  font-size: 1.5rem;
+}
+
+.loading-spinner.medium {
+  font-size: 3rem;
+}
+
+.loading-spinner.large {
+  font-size: 5rem;
+}
+
+.loading-message {
+  margin: 0;
+  color: var(--loading-text);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.loading-container.fullscreen .loading-message {
+  color: white;
+  margin-top: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Logo animado en pantalla completa */
+.loading-container.fullscreen .loading-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.loading-container.fullscreen .loading-logo h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  letter-spacing: 2px;
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.loading-container.fullscreen .loading-logo h2 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--loading-accent);
+  margin: 0;
+  letter-spacing: 8px;
+  animation: fadeInUp 0.8s ease 0.2s forwards;
+  opacity: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    border-radius: 8px;
-    background-color: var(--loading-background);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  .loading-container.fullscreen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    height: 100vh;
-    max-width: none;
-    border-radius: 0;
-    background-color: var(--loading-background);
-    z-index: 9999;
-  }
-  
-  .spinner-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  
-  .loading-spinner {
-    animation: spin 1s linear infinite;
-    color: var(--loading-primary);
-  }
-  
-  .loading-spinner.small {
-    font-size: 1.5rem;
-  }
-  
+}
+
+/* Responsive */
+@media (max-width: 576px) {
   .loading-spinner.medium {
-    font-size: 3rem;
+    font-size: 2.5rem;
   }
   
   .loading-spinner.large {
-    font-size: 5rem;
+    font-size: 4rem;
+  }
+  
+  .loading-container {
+    max-width: 90%;
+    padding: 25px;
+  }
+  
+  .loading-container.fullscreen .loading-logo h1 {
+    font-size: 2rem;
+  }
+  
+  .loading-container.fullscreen .loading-logo h2 {
+    font-size: 1rem;
+    letter-spacing: 6px;
   }
   
   .loading-message {
-    margin: 0;
-    color: var(--loading-text);
     font-size: 1rem;
-    font-weight: 500;
   }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-  
-  /* Responsive */
-  @media (max-width: 576px) {
-    .loading-spinner.medium {
-      font-size: 2.5rem;
-    }
-    
-    .loading-spinner.large {
-      font-size: 4rem;
-    }
-    
-    .loading-container {
-      max-width: 90%;
-    }
-  }
+}

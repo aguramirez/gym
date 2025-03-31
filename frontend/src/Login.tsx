@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaUser, FaLock } from "react-icons/fa";
 import { BiLoaderAlt } from "react-icons/bi";
 import authService from "./services/authService";
+import LoadingScreen from "./components/LoadingScreen";
 import "./login.css";
 
 const Login = () => {
@@ -12,14 +13,26 @@ const Login = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const navigate = useNavigate();
-  
-  // Verificar si ya hay una sesión activa
+
+  // Primera fase: mostrar la pantalla de carga inicial
   useEffect(() => {
-    const checkAuth = async () => {
+    const initialTimer = setTimeout(() => {
+      setShowLoadingScreen(false);
+      // Comenzar a verificar autenticación después de la pantalla de carga
+      checkAuthentication();
+    }, 2500); // Duración de la pantalla de carga
+
+    return () => clearTimeout(initialTimer);
+  }, []);
+
+  // Segunda fase: verificar si ya hay una sesión activa
+  const checkAuthentication = async () => {
+    try {
       // Pequeña demora para mostrar la pantalla de carga (más natural)
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       const user = authService.getCurrentUser();
       if (user) {
         // Si el usuario ya está autenticado, redirigir según su rol
@@ -32,10 +45,11 @@ const Login = () => {
       } else {
         setIsChecking(false);
       }
-    };
-    
-    checkAuth();
-  }, [navigate]);
+    } catch (error) {
+      console.error("Error al verificar autenticación:", error);
+      setIsChecking(false);
+    }
+  };
 
   const validateForm = (): boolean => {
     if (!nombre.trim()) {
@@ -51,9 +65,9 @@ const Login = () => {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsLoading(true);
     setError(null);
 
@@ -61,17 +75,23 @@ const Login = () => {
       const response = await authService.login({ nombre, dni });
       console.log("Respuesta de login:", response);
 
-      // Redirección basada en rol
-      if (response.rol === "ADMIN" || response.rol === "TRAINER") {
-        console.log("Redirigiendo a dashboard");
-        setTimeout(() => navigate("/dashboard"), 500);
-      } else {
-        console.log("Redirigiendo a vista de cliente");
-        setTimeout(() => navigate(`/cliente/${response.clienteId}`), 500);
-      }
+      // Muestra la pantalla de carga antes de redirigir
+      setShowLoadingScreen(true);
+
+      // Redirección basada en rol con un retraso para mostrar la pantalla de carga
+      setTimeout(() => {
+        if (response.rol === "ADMIN" || response.rol === "TRAINER") {
+          console.log("Redirigiendo a dashboard");
+          navigate("/dashboard");
+        } else {
+          console.log("Redirigiendo a vista de cliente");
+          navigate(`/cliente/${response.clienteId}`);
+        }
+      }, 1500); // Tiempo suficiente para mostrar la pantalla de carga
+
     } catch (err: any) {
       console.error("Error de login:", err);
-      
+
       if (err.response) {
         if (err.response.status === 401) {
           setError("Credenciales incorrectas. Por favor, intente nuevamente.");
@@ -83,10 +103,14 @@ const Login = () => {
       } else {
         setError(`Error: ${err.message}`);
       }
-    } finally {
       setIsLoading(false);
     }
   };
+
+  // Si está mostrando la pantalla de carga inicial
+  if (showLoadingScreen) {
+    return <LoadingScreen message="Iniciando..." />;
+  }
 
   // Si está verificando la autenticación, mostrar carga
   if (isChecking) {
@@ -104,13 +128,13 @@ const Login = () => {
     <div className="login-container">
       <div className="login-content">
         <div className="login-header">
-          <h1>FABIAN</h1>
+          <h1>FABIÁN</h1>
           <h2>COACH</h2>
         </div>
-        
+
         <div className="form-container">
           {error && <div className="error-message">{error}</div>}
-          
+
           <form onSubmit={handleLogin}>
             <div className="input-group">
               <label htmlFor="nombre">
@@ -125,9 +149,10 @@ const Login = () => {
                 onChange={(e) => setNombre(e.target.value)}
                 disabled={isLoading}
                 placeholder="Ingrese su nombre"
+                autoComplete="off"
               />
             </div>
-            
+
             <div className="input-group">
               <label htmlFor="dni">
                 <FaLock className="input-icon" />
@@ -142,34 +167,36 @@ const Login = () => {
                   onChange={(e) => setDni(e.target.value)}
                   disabled={isLoading}
                   placeholder="Ingrese su DNI"
+                  autoComplete="current-password"
                 />
-                <button 
-                  type="button" 
-                  className="toggle-password" 
+                <button
+                  type="button"
+                  className="toggle-password"
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={isLoading}
+                  aria-label={showPassword ? "Ocultar DNI" : "Mostrar DNI"}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
             </div>
-            
-            <button 
-              type="submit" 
+
+            <button
+              type="submit"
               className={`login-button ${isLoading ? 'loading' : ''}`}
               disabled={isLoading}
             >
               {isLoading ? (
                 <>
-                  <BiLoaderAlt className="btn-spinner" /> 
+                  <BiLoaderAlt className="btn-spinner" />
                   Iniciando sesión...
                 </>
               ) : (
-                "Ingresar"
+                "INGRESAR"
               )}
             </button>
           </form>
-          
+
           <footer className="login-footer">
             <p>Para obtener acceso, contacte con el administrador del gimnasio</p>
           </footer>

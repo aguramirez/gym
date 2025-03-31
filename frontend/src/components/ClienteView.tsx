@@ -4,6 +4,7 @@ import axios from "axios";
 import { FaSignOutAlt, FaUser, FaDumbbell, FaAngleDown, FaAngleUp, FaEdit, FaSave, FaTimes } from "react-icons/fa";
 import { BiLoaderAlt } from "react-icons/bi";
 import authService from "../services/authService";
+import LoadingScreen from "./LoadingScreen";
 import "./clienteView.css";
 
 // Tipos de datos
@@ -59,12 +60,27 @@ const ClienteView = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [showLoadingScreen, setShowLoadingScreen] = useState<boolean>(true);
+    const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth <= 768);
+    const [sidebarVisible, setSidebarVisible] = useState<boolean>(false);
+
+    // Detectar si es móvil
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     // Función para extraer el valor de las notas
     const extractNotasText = (notasValue: string | undefined): string => {
         if (!notasValue) return "";
 
-        // Comprobar si las notas están en formato JSON
+        // Comprobar si las notas están en formato JSON (empieza con {"notas":)
         if (notasValue.trim().startsWith('{') && notasValue.includes('"notas":')) {
             try {
                 // Intentar parsear el JSON
@@ -88,6 +104,16 @@ const ClienteView = () => {
 
     // Verificar autenticación y obtener el usuario actual
     useEffect(() => {
+        // Primero mostrar la pantalla de carga
+        const loadingTimer = setTimeout(() => {
+            setShowLoadingScreen(false);
+            checkAuth();
+        }, 1500);
+
+        return () => clearTimeout(loadingTimer);
+    }, []);
+
+    const checkAuth = () => {
         const currentUser = authService.getCurrentUser();
         if (!currentUser) {
             navigate("/");
@@ -98,86 +124,86 @@ const ClienteView = () => {
         if (clienteId !== currentUser.clienteId && currentUser.rol !== "ADMIN" && currentUser.rol !== "TRAINER") {
             navigate(`/cliente/${currentUser.clienteId}`);
         }
-    }, [clienteId, navigate]);
+
+        // Si pasó las verificaciones, cargar los datos
+        fetchClienteData();
+    };
 
     // Obtener datos del cliente
-    useEffect(() => {
-        const fetchClienteData = async () => {
-            if (isNaN(clienteId)) {
-                setError("ID de cliente inválido");
-                setIsLoading(false);
-                return;
-            }
-            
-            try {
-                setIsLoading(true);
-                // Modificar esta línea para incluir el token en el header manualmente
-                const response = await axios.get<Cliente>(
-                    `http://localhost:8080/clientes/${clienteId}`,
-                    {
-                        headers: {
-                            'Authorization': authService.getToken()
-                        }
+    const fetchClienteData = async () => {
+        if (isNaN(clienteId)) {
+            setError("ID de cliente inválido");
+            setIsLoading(false);
+            return;
+        }
+        
+        try {
+            setIsLoading(true);
+            // Modificar esta línea para incluir el token en el header manualmente
+            const response = await axios.get<Cliente>(
+                `http://localhost:8080/clientes/${clienteId}`,
+                {
+                    headers: {
+                        'Authorization': authService.getToken()
                     }
-                );
-                setCliente(response.data);
-                setError(null);
-            } catch (err: any) {
-                console.error("Error al obtener datos del cliente:", err);
-                setError("No se pudo cargar la información del cliente");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchClienteData();
-    }, [clienteId]);
+                }
+            );
+            setCliente(response.data);
+            setError(null);
+            
+            // Una vez que tenemos los datos del cliente, obtener sus rutinas
+            await fetchRutinasCliente();
+        } catch (err: any) {
+            console.error("Error al obtener datos del cliente:", err);
+            setError("No se pudo cargar la información del cliente");
+            setIsLoading(false);
+        }
+    };
 
     // Obtener rutinas del cliente
-    useEffect(() => {
-        const fetchRutinasCliente = async () => {
-            if (isNaN(clienteId)) return;
-            
-            try {
-                setIsLoading(true);
-                const response = await axios.get<ClienteRutina[]>(
-                    `http://localhost:8080/cliente-rutinas/rutinas`,
-                    { 
-                        params: { clienteId },
-                        headers: {
-                            'Authorization': authService.getToken()
-                        }
+    const fetchRutinasCliente = async () => {
+        if (isNaN(clienteId)) return;
+        
+        try {
+            const response = await axios.get<ClienteRutina[]>(
+                `http://localhost:8080/cliente-rutinas/rutinas`,
+                { 
+                    params: { clienteId },
+                    headers: {
+                        'Authorization': authService.getToken()
                     }
-                );
-                
-                if (Array.isArray(response.data)) {
-                    setClienteRutinas(response.data);
-                    
-                    // Si hay rutinas y no hay una seleccionada, seleccionar la primera
-                    if (response.data.length > 0 && !selectedRutina) {
-                        setSelectedRutina(response.data[0]);
-                    }
-                    
-                    setError(null);
-                } else {
-                    console.warn("No se encontraron rutinas");
-                    setClienteRutinas([]);
                 }
-            } catch (err: any) {
-                console.error("Error al obtener rutinas del cliente:", err);
-                setError("No se pudieron cargar las rutinas");
-            } finally {
-                setIsLoading(false);
+            );
+            
+            if (Array.isArray(response.data)) {
+                setClienteRutinas(response.data);
+                
+                // Si hay rutinas y no hay una seleccionada, seleccionar la primera
+                if (response.data.length > 0 && !selectedRutina) {
+                    setSelectedRutina(response.data[0]);
+                }
+                
+                setError(null);
+            } else {
+                console.warn("No se encontraron rutinas");
+                setClienteRutinas([]);
             }
-        };
-
-        fetchRutinasCliente();
-    }, [clienteId]);
+        } catch (err: any) {
+            console.error("Error al obtener rutinas del cliente:", err);
+            setError("No se pudieron cargar las rutinas");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Manejar el cierre de sesión
     const handleLogout = () => {
         authService.logout();
-        navigate("/");
+        // Mostrar la pantalla de carga antes de redirigir
+        setShowLoadingScreen(true);
+        setTimeout(() => {
+            navigate("/");
+        }, 1000);
     };
 
     // Funciones para el acordeón
@@ -201,6 +227,11 @@ const ClienteView = () => {
         setExpandedDias({});
         setExpandedEjercicios({});
         setEditingEjercicio(null);
+        
+        // En móvil, ocultar el sidebar después de seleccionar
+        if (isMobile) {
+            setSidebarVisible(false);
+        }
     };
 
     // Iniciar edición de notas
@@ -276,19 +307,19 @@ const ClienteView = () => {
     // Función para formatear enlaces de video
     const getEmbedUrl = (url: string | undefined) => {
         if (!url) return "";
-
+        
         // YouTube normal
         if (url.includes("youtube.com/watch")) {
             const videoId = url.split("v=")[1]?.split("&")[0];
             if (videoId) return `https://www.youtube.com/embed/${videoId}`;
         }
-
+        
         // YouTube Shorts
         if (url.includes("youtube.com/shorts")) {
             const videoId = url.split("/shorts/")[1]?.split("?")[0];
             if (videoId) return `https://www.youtube.com/embed/${videoId}`;
         }
-
+        
         // Instagram Reels / Posts (necesita incluir /embed/ en la URL)
         if (url.includes("instagram.com/")) {
             if (url.includes("/p/") || url.includes("/reel/")) {
@@ -297,9 +328,19 @@ const ClienteView = () => {
                 if (id) return `https://www.instagram.com/p/${id}/embed/`;
             }
         }
-
+        
         return url; // Si no se reconoce ningún patrón, devolver la URL original
     };
+
+    // Toggle sidebar en dispositivos móviles
+    const toggleSidebar = () => {
+        setSidebarVisible(!sidebarVisible);
+    };
+
+    // Componente de pantalla de carga
+    if (showLoadingScreen) {
+        return <LoadingScreen message="Cargando rutinas..." />;
+    }
 
     // Componente de carga
     if (isLoading) {
@@ -335,15 +376,27 @@ const ClienteView = () => {
                     <FaUser className="user-icon" />
                     <h2>{cliente?.nombre || "Usuario"}</h2>
                 </div>
-                <button className="logout-button" onClick={handleLogout}>
-                    <FaSignOutAlt /> Cerrar Sesión
-                </button>
+                <div className="header-actions">
+                    {isMobile && (
+                        <button 
+                            className="menu-toggle-btn" 
+                            onClick={toggleSidebar}
+                            aria-label="Toggle menu"
+                        >
+                            <FaDumbbell />
+                            <span className="menu-label">Rutinas</span>
+                        </button>
+                    )}
+                    <button className="logout-button" onClick={handleLogout}>
+                        <FaSignOutAlt /> <span className="btn-text">Cerrar Sesión</span>
+                    </button>
+                </div>
             </header>
 
             {/* Contenido principal */}
             <div className="cliente-content">
-                {/* Sidebar con rutinas */}
-                <div className="rutinas-sidebar">
+                {/* Sidebar con rutinas - Visible en escritorio o cuando se activa en móvil */}
+                <div className={`rutinas-sidebar ${isMobile ? (sidebarVisible ? 'visible' : 'hidden') : ''}`}>
                     <h3>Mis Rutinas</h3>
 
                     {clienteRutinas.length === 0 ? (
@@ -475,7 +528,8 @@ const ClienteView = () => {
                                                                                     No hay notas para este ejercicio.
                                                                                     Haz clic en "Editar" para añadir.
                                                                                 </p>
-                                                                            )}</div>
+                                                                            )}
+                                                                        </div>
                                                                     )}
                                                                 </div>
                                                             </div>

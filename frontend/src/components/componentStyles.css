@@ -1,14 +1,14 @@
 /* Variables y estilos generales */
 :root {
-    --primary: #3f51b5;
-    --primary-light: #c5cae9;
-    --primary-dark: #303f9f;
+    --primary: #22263A;
+    --primary-light: #343a40;
+    --primary-dark: #181c2a;
+    --accent: #D3FF00;
     --secondary: #757575;
-    --accent: #ff4081;
+    --info: #2196f3;
     --success: #4caf50;
     --warning: #ff9800;
     --danger: #f44336;
-    --info: #2196f3;
     --text: #212121;
     --text-light: #757575;
     --background: #f5f5f5;
@@ -16,7 +16,7 @@
     --border: #e0e0e0;
     --shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     --shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.15);
-    --radius: 8px;
+    --radius: 10px;
     --transition: all 0.3s ease;
 }
 
@@ -54,21 +54,22 @@
 /* Barra de búsqueda */
 .search-bar {
     position: relative;
+    width: 100%;
 }
 
 .search-bar input {
-    padding: 10px 16px;
+    padding: 12px 16px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
     font-size: 0.9rem;
-    min-width: 250px;
+    width: 100%;
     transition: var(--transition);
 }
 
 .search-bar input:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--primary-light);
+    box-shadow: 0 0 0 2px rgba(34, 38, 58, 0.1);
 }
 
 /* Botones principales */
@@ -88,6 +89,8 @@
 
 .btn-primary:hover {
     background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 .btn-secondary {
@@ -106,6 +109,29 @@
 
 .btn-secondary:hover {
     background-color: #616161;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.btn-accent {
+    padding: 10px 16px;
+    background-color: var(--accent);
+    color: var(--primary);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.btn-accent:hover {
+    background-color: #c1eb00;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 .btn-danger {
@@ -123,33 +149,38 @@
 
 .btn-danger:hover {
     background-color: #d32f2f;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 .btn-primary:disabled,
 .btn-secondary:disabled,
-.btn-danger:disabled {
+.btn-danger:disabled,
+.btn-accent:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
 }
 
 /* Tabla de datos */
 .list-section {
     width: 100%;
     overflow-x: auto;
+    background-color: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
 }
 
 .data-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    background-color: var(--card);
-    border-radius: var(--radius);
-    overflow: hidden;
 }
 
 .data-table th {
-    background-color: var(--primary-light);
-    color: var(--text);
+    background-color: #f8f9fa;
+    color: var(--primary);
     padding: 14px 16px;
     font-weight: 500;
 }
@@ -177,7 +208,7 @@
 .btn-icon {
     width: 36px;
     height: 36px;
-    border-radius: 50%;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -193,7 +224,8 @@
 }
 
 .btn-icon.btn-warning {
-    background-color: var(--warning);
+    background-color: var(--primary);
+    color: var(--accent);
 }
 
 .btn-icon.btn-danger {
@@ -247,6 +279,10 @@
     font-size: 2rem;
     color: var(--primary);
     margin-bottom: 16px;
+}
+
+.loading-spinner.small {
+    font-size: 1rem;
 }
 
 @keyframes spin {
@@ -303,12 +339,16 @@
     align-items: center;
     padding: 16px 20px;
     border-bottom: 1px solid var(--border);
+    background-color: var(--primary);
+    color: white;
+    border-top-left-radius: var(--radius);
+    border-top-right-radius: var(--radius);
 }
 
 .modal-header h2 {
     margin: 0;
     font-size: 1.4rem;
-    color: var(--primary);
+    color: white;
 }
 
 .btn-close {
@@ -317,12 +357,14 @@
     font-size: 1.5rem;
     cursor: pointer;
     line-height: 1;
-    color: var(--secondary);
+    color: white;
+    opacity: 0.8;
     transition: var(--transition);
 }
 
 .btn-close:hover {
-    color: var(--danger);
+    opacity: 1;
+    color: var(--accent);
 }
 
 .modal-body {
@@ -357,7 +399,7 @@
 .form-control:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--primary-light);
+    box-shadow: 0 0 0 2px rgba(34, 38, 58, 0.1);
 }
 
 .form-control.error {
@@ -435,6 +477,31 @@
     margin-top: 24px;
 }
 
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+.badge.admin {
+    background-color: var(--primary);
+    color: var(--accent);
+}
+
+.badge.trainer {
+    background-color: var(--primary);
+    color: white;
+}
+
+.badge.user {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
 /* Estilos responsivos */
 @media (max-width: 768px) {
     .section-header {
@@ -476,6 +543,17 @@
     .info-row strong {
         min-width: auto;
     }
+
+    .modal-container {
+        max-width: 100%;
+        height: 100%;
+        max-height: 100%;
+        border-radius: 0;
+    }
+
+    .modal-header {
+        border-radius: 0;
+    }
 }
 
 @media (max-width: 576px) {
@@ -494,11 +572,57 @@
         font-size: 0.85rem;
     }
 
-    .modal-container {
-        max-width: 100%;
-    }
-
     .ejercicio-details {
         padding: 8px;
     }
+}
+
+/* Animaciones adicionales */
+.btn-primary, .btn-secondary, .btn-danger, .btn-accent {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::after, 
+.btn-secondary::after, 
+.btn-danger::after,
+.btn-accent::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%);
+    transform-origin: 50% 50%;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0);
+        opacity: 0;
+    }
+    20% {
+        transform: scale(25, 25);
+        opacity: 0.2;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(40, 40);
+    }
+}
+
+.btn-primary:focus:not(:active)::after,
+.btn-secondary:focus:not(:active)::after,
+.btn-danger:focus:not(:active)::after,
+.btn-accent:focus:not(:active)::after {
+    animation: ripple 1s ease-out;
+}
+
+/* Transiciones suaves en hover */
+.btn-icon, .action-buttons button, .form-control, .modal-container {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }

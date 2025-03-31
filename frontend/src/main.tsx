@@ -6,7 +6,7 @@ import Login from "./Login.tsx";
 import Dashboard from "./components/Dashboard.tsx";
 import ClienteView from "./components/ClienteView.tsx";
 import authService from "./services/authService";
-import Loading from "./components/Loading";
+import LoadingScreen from "./components/LoadingScreen";
 import { useState } from "react";
 
 // Componente para rutas protegidas
@@ -29,7 +29,7 @@ const ProtectedRoute = ({ element, requiredRole }: ProtectedRouteProps) => {
   
   // Mientras verifica, mostrar pantalla de carga
   if (isChecking) {
-    return <Loading fullScreen message="Verificando acceso..." />;
+    return <LoadingScreen message="Verificando acceso..." timeout={1000} />;
   }
   
   // Verificar si el usuario está autenticado
@@ -83,7 +83,7 @@ const App = () => {
       // Pequeña demora para mostrar la pantalla de carga inicial
       setTimeout(() => {
         setIsInitializing(false);
-      }, 1000);
+      }, 2000);
     };
     
     initializeApp();
@@ -109,7 +109,7 @@ const App = () => {
 
   // Mostrar pantalla de carga mientras inicializa
   if (isInitializing) {
-    return <Loading fullScreen message="Iniciando aplicación..." size="large" />;
+    return <LoadingScreen message="Iniciando aplicación..." />;
   }
 
   return (
