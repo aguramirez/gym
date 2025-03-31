@@ -384,7 +384,7 @@ const ClienteView = () => {
                             aria-label="Toggle menu"
                         >
                             <FaDumbbell />
-                            <span className="menu-label">Rutinas</span>
+                            <span className="menu-label">Mis Rutinas</span>
                         </button>
                     )}
                     <button className="logout-button" onClick={handleLogout}>

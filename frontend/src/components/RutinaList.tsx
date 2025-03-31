@@ -184,13 +184,13 @@ const RutinaList = () => {
           >
             <FaPlus /> Nueva Rutina
           </button>
-          <button 
+          {/* <button 
             className="btn-secondary" 
             onClick={fetchRutinas}
             title="Actualizar Lista"
           >
             <FaSync /> Actualizar
-          </button>
+          </button> */}
         </div>
       </div>
       
@@ -219,7 +219,7 @@ const RutinaList = () => {
                   <th>Nombre</th>
                   <th>Días</th>
                   <th>Ejercicios</th>
-                  <th>Acciones</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>

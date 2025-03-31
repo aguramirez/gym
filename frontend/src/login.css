@@ -52,7 +52,7 @@
 .login-header h1 {
   font-size: 3rem;
   font-weight: 700;
-  color: var(--text-light);
+  color: white;
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -60,12 +60,12 @@
 }
 
 .login-header h2 {
-  font-size: 1.1rem;
-  font-weight: 400;
+  font-size: 1.2rem;
+  font-weight: 500;
   color: var(--accent);
-  margin: 10px 0 0;
+  margin: 0px 0 0;
   text-transform: uppercase;
-  letter-spacing: 5px;
+  letter-spacing: 8px;
 }
 
 /* Contenedor del formulario */
@@ -115,7 +115,7 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 8px;
-  color: var(--text-light);
+  color: white;
   font-weight: 400;
 }
 
@@ -130,7 +130,7 @@
   border-radius: 5px;
   font-size: 1rem;
   background-color: rgba(255,255,255,0.1);
-  color: var(--text-light);
+  color: white;
   transition: var(--transition);
 }
 
@@ -258,8 +258,8 @@
   }
   
   .login-header h2 {
-    font-size: 0.9rem;
-    letter-spacing: 3px;
+    font-size: 1.2rem;
+    letter-spacing: 8px;
   }
   
   .form-container {
@@ -272,5 +272,55 @@
   
   .loading-overlay {
     padding: 30px;
+  }
+}
+
+/* Modificaciones para el login.css */
+
+/* Modificar estos estilos para mantener la consistencia en los inputs */
+.input-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: white;
+  font-weight: 400;
+}
+
+/* Nuevo contenedor para el campo de contraseña (reemplaza password-container) */
+.password-field-container {
+  position: relative;
+  width: 100%;
+}
+
+/* Ajustes para el icono de mostrar/ocultar contraseña */
+.toggle-password {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.1rem;
+  transition: var(--transition);
+  z-index: 2;
+}
+
+.toggle-password:hover {
+  color: var(--accent);
+}
+
+/* Mejoras adicionales para la experiencia móvil */
+@media (max-width: 480px) {
+  .input-field {
+    padding: 14px 16px; /* Mayor espacio para facilitar el toque en móviles */
+  }
+  
+  .toggle-password {
+    padding: 10px; /* Área de toque más grande para el botón en móviles */
+    right: 8px; /* Ajuste de posición para compensar el padding */
   }
 }

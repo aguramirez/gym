@@ -158,7 +158,7 @@ const Login = () => {
                 <FaLock className="input-icon" />
                 <span className="input-label">DNI</span>
               </label>
-              <div className="password-container">
+              <div className="password-field-container">
                 <input
                   id="dni"
                   type={showPassword ? "text" : "password"}

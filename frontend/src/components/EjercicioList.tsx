@@ -206,13 +206,13 @@ const EjercicioList = () => {
             <FaPlus /> Nuevo Ejercicio
           </button>
           {/* Botón para actualizar lista */}
-          <button 
+          {/* <button 
             className="btn-secondary" 
             onClick={fetchEjercicios}
             title="Actualizar Lista"
           >
             <FaSync /> Actualizar
-          </button>
+          </button> */}
         </div>
       </div>
       
@@ -242,7 +242,7 @@ const EjercicioList = () => {
                 <tr>
                   <th>Nombre</th>
                   <th>Video</th>
-                  <th>Acciones</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>

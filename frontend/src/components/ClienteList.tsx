@@ -357,13 +357,13 @@ const ClienteList = () => {
           >
             <FaUserPlus /> Nuevo Cliente
           </button>
-          <button
+          {/* <button
             className="btn-secondary"
             onClick={() => fetchClientes()}
             title="Actualizar Lista"
           >
             <FaSync /> Actualizar
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -384,18 +384,18 @@ const ClienteList = () => {
               <thead>
                 <tr>
                   <th>Nombre</th>
-                  <th>DNI</th>
-                  <th>Teléfono</th>
+                  {/* <th>DNI</th>
+                  <th>Teléfono</th> */}
                   <th>Rol</th>
-                  <th>Acciones</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {filteredClientes.map(cliente => (
                   <tr key={cliente.id}>
                     <td>{cliente.nombre}</td>
-                    <td>{cliente.dni}</td>
-                    <td>{cliente.telefono}</td>
+                    {/* <td>{cliente.dni}</td>
+                    <td>{cliente.telefono}</td> */}
                     <td>
                       <span className={`badge ${cliente.rol === "ADMIN" ? "admin" :
                           cliente.rol === "TRAINER" ? "trainer" : "user"

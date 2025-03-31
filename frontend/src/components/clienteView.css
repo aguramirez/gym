@@ -598,6 +598,7 @@
 
 .ejercicio-header.active {
   background-color: var(--primary-color);
+  color: white;
 }
 
 /* Añadir estilos para el nuevo botón de menú en móviles */

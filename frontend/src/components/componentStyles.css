@@ -407,7 +407,7 @@
 }
 
 .error-message {
-    color: var(--danger);
+    color: white;
     font-size: 0.85rem;
     margin-top: 6px;
 }
