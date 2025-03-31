@@ -71,7 +71,7 @@ const authService = {
     }
   },
 
-  // Get token (nuevo método)
+  // Get token
   getToken: () => {
     return localStorage.getItem('token');
   },

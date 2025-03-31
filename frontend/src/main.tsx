@@ -33,7 +33,7 @@ const ProtectedRoute = ({ element, requiredRole }: ProtectedRouteProps) => {
   }
   
   // Verificar si el usuario está autenticado
-  if (!authService.isAuthenticated()) {
+  if (!authService.isLoggedIn()) {  // Cambiado de isAuthenticated a isLoggedIn
     console.log("Usuario no autenticado, redirigiendo a login");
     return <Navigate to="/" replace />;
   }
@@ -47,7 +47,7 @@ const ProtectedRoute = ({ element, requiredRole }: ProtectedRouteProps) => {
       console.log("Usuario no tiene el rol requerido");
       // Redirigir a página de cliente si el usuario está autenticado pero no tiene el rol requerido
       if (user) {
-        return <Navigate to={`/cliente/${user.clienteId}`} replace />;
+        return <Navigate to={`/cliente/${user.id}`} replace />;  // Cambiado de clienteId a id
       }
       
       // Si por alguna razón no hay información de usuario, redirigir al login
@@ -73,12 +73,15 @@ const App = () => {
       console.log("Token en localStorage:", token ? "Presente" : "Ausente");
       
       if (token) {
-        console.log("Rol almacenado:", localStorage.getItem('rol'));
-        console.log("Cliente ID almacenado:", localStorage.getItem('clienteId'));
+        const user = authService.getCurrentUser();
+        console.log("Usuario almacenado:", user ? "Presente" : "Ausente");
+        if (user) {
+          console.log("Rol almacenado:", user.rol);
+          console.log("Cliente ID almacenado:", user.id);
+        }
       }
       
-      // Inicializar el servicio
-      authService.initializeAuth();
+      // Ya no llamamos a initializeAuth() porque no existe en nuestro servicio
       
       // Pequeña demora para mostrar la pantalla de carga inicial
       setTimeout(() => {
