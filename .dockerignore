@@ -7,3 +7,6 @@ Procfile
 heroku.yml
 railway.json
 system.properties
+**/node_modules
+**/target
+!backend/target/*.jar
