@@ -1,26 +1,35 @@
-# Primera etapa: Construir la aplicación
+# Primera etapa: Compilación
 FROM maven:3.9-eclipse-temurin-17-alpine AS build
+
+# Configurar directorio de trabajo
 WORKDIR /app
 
-# Copiar todo el contenido del backend
-COPY backend/pom.xml ./
+# Copiar el archivo pom.xml primero para aprovechar la caché de dependencias
+COPY backend/pom.xml .
+
+# Descargar dependencias
+RUN mvn -B dependency:go-offline
+
+# Copiar el código fuente
 COPY backend/src ./src
-COPY backend/.mvn ./.mvn
-COPY backend/mvnw ./mvnw
-RUN chmod +x mvnw
 
-# Compilar el proyecto
-RUN ./mvnw clean package -DskipTests
+# Compilar la aplicación
+RUN mvn clean package -DskipTests
 
-# Segunda etapa: Ejecutar la aplicación
+# Segunda etapa: Runtime
 FROM eclipse-temurin:17-jre-alpine
+
+# Configurar directorio de trabajo
 WORKDIR /app
 
-# Copiar el JAR construido
+# Copiar el JAR compilado desde la primera etapa
 COPY --from=build /app/target/*.jar app.jar
 
-# Puerto expuesto
+# Exponer el puerto
 EXPOSE 8080
 
-# Comando para iniciar la aplicación
-CMD ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
+# Comando para ejecutar la aplicación
+# Al final del Dockerfile, reemplaza la línea CMD
+COPY start.sh .
+RUN chmod +x start.sh
+CMD ["./start.sh"]
