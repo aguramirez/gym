@@ -12,11 +12,14 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
+# Instalar herramientas de depuración
+RUN apk add --no-cache bash curl
+
 # Copiar el JAR construido
 COPY --from=build /app/target/*.jar app.jar
 
 # Puerto expuesto
 EXPOSE 8080
 
-# Comando para iniciar la aplicación (simplificado)
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+# Comando para iniciar la aplicación con mayor información de logs
+ENTRYPOINT ["java", "-jar", "/app/app.jar", "--debug", "--logging.level.root=DEBUG"]
