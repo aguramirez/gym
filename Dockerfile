@@ -2,21 +2,19 @@
 FROM maven:3.9-eclipse-temurin-17-alpine AS build
 WORKDIR /app
 
-# Copiar el proyecto backend
+# Copiar todo el contenido del backend
 COPY backend/pom.xml ./
-# Descargar dependencias primero (para aprovechar caché)
-RUN mvn dependency:go-offline
-
-# Copiar el código fuente y compilar
 COPY backend/src ./src
-RUN mvn clean package -DskipTests
+COPY backend/.mvn ./.mvn
+COPY backend/mvnw ./mvnw
+RUN chmod +x mvnw
+
+# Compilar el proyecto
+RUN ./mvnw clean package -DskipTests
 
 # Segunda etapa: Ejecutar la aplicación
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-
-# Instalar herramientas básicas
-RUN apk add --no-cache bash curl
 
 # Copiar el JAR construido
 COPY --from=build /app/target/*.jar app.jar
@@ -25,4 +23,4 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 
 # Comando para iniciar la aplicación
-ENTRYPOINT ["java", "-jar", "/app/app.jar", "--spring.profiles.active=prod"]
+CMD ["java", "-jar", "app.jar", "--spring.profiles.active=prod"]
