@@ -1,0 +1,9 @@
+frontend/
+.git/
+.github/
+database/
+*.md
+Procfile
+heroku.yml
+railway.json
+system.properties
