@@ -52,7 +52,7 @@ public class SecurityConfig {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             .authorizeHttpRequests()
                 // Rutas públicas (no requieren autenticación)
-                .requestMatchers("/","/auth/**").permitAll()
+                .requestMatchers("/", "/auth/**", "/health").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
