@@ -1,16 +1,22 @@
-FROM eclipse-temurin:17-jre-alpine
+# Etapa 1: Construcción del JAR
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY backend /app
+RUN mvn clean package -DskipTests
 
+# Etapa 2: Imagen final y ligera
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Copiar el JAR compilado
-COPY backend/target/demo-0.0.1-SNAPSHOT.jar app.jar
+# Copiamos solo el .jar del build anterior
+COPY --from=build /app/target/demo-0.0.1-SNAPSHOT.jar app.jar
 
-# Copiar el script de entrada y darle permisos de ejecución
+# Copiamos el entrypoint que ya hiciste
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 
-# Exponer el puerto
+# Puerto expuesto
 EXPOSE 8080
 
-# Usar el script como punto de entrada
+# Comando para ejecutar Spring Boot
 ENTRYPOINT ["/app/entrypoint.sh"]
