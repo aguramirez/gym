@@ -1,8 +1,0 @@
-build:
-  languages:
-    - java
-  config:
-    PATH: backend
-
-run:
-  web: cd backend && java -jar target/*.jar --server.port=$PORT
