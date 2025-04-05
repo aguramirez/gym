@@ -1,5 +1,5 @@
 // src/config/api.config.ts
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const apiUrl = import.meta.env.VITE_API_URL || 'https://gracious-intuition-production.up.railway.app';
 console.log('API URL que se está utilizando:', apiUrl);
 
 export const config = {
