@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import useDatos from "../services/useDatos";
+import { useRutinas, useEjercicios } from "../services/useDatos";
 import { FaPlus, FaEdit, FaTrash, FaEye, FaSpinner } from "react-icons/fa";
 import RutinaForm from "./RutinaForm";
 import "./rutinaList.css";
@@ -35,7 +35,8 @@ interface Rutina {
 }
 
 const RutinaList = () => {
-  const { rutinas, ejercicios, fetchRutinas } = useDatos();
+  const { rutinas, fetchRutinas, loading: rutinasLoading } = useRutinas();
+  const { ejercicios } = useEjercicios();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredRutinas, setFilteredRutinas] = useState<any[]>([]);
   const [selectedRutina, setSelectedRutina] = useState<Rutina | null>(null);

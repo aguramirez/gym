@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import useDatos from "../services/useDatos";
+import { useEjercicios } from "../services/useDatos";
 import { FaPlus, FaTrash, FaEdit, FaSpinner } from "react-icons/fa";
 import EjercicioForm from "./EjercicioForm";
 import EjercicioView from "./EjercicioView";
@@ -10,12 +10,12 @@ import "./componentStyles.css";
 export interface Ejercicio {
   id?: number;
   nombre: string;
-  video: string;
+  video?: string;
 }
 
 const EjercicioList = () => {
   // Estados para manejar los datos y la interfaz
-  const { ejercicios = [], fetchEjercicios } = useDatos() as { ejercicios: Ejercicio[], fetchEjercicios: () => Promise<void> };
+  const { ejercicios = [], fetchEjercicios } = useEjercicios();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredEjercicios, setFilteredEjercicios] = useState<Ejercicio[]>([]);
   const [selectedEjercicio, setSelectedEjercicio] = useState<Ejercicio | null>(null);
@@ -278,7 +278,7 @@ const EjercicioList = () => {
               {error && <div className="error-message">{error}</div>}
               <EjercicioForm
                 onSave={handleSaveEjercicio}
-                initialData={selectedEjercicio}
+                initialData={selectedEjercicio as any}
                 isLoading={isLoading}
                 editMode={editMode}
               />
