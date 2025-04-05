@@ -6,7 +6,7 @@ dockerfilePath = "Dockerfile"
 restartPolicyType = "ON_FAILURE"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
-startCommand = "/app/entrypoint.sh"
+numReplicas = 1
 
 [service]
 internal_port = 8080
