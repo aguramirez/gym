@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HelloController {
     @GetMapping("/health")
     public ResponseEntity<String> health() {
+        System.out.println("⚕️ Healthcheck HIT!");
         return ResponseEntity.ok("OK");
     }
-}
 
+}
