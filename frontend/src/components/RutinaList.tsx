@@ -146,7 +146,7 @@ const RutinaList = () => {
         await api.put(`${config.RUTINAS_ENDPOINT}/${selectedRutina.id}`, rutina);
         alert("Rutina actualizada con éxito");
       } else {
-        await api.post(`${config.RUTINAS_ENDPOINT}/rutinas`, rutina);
+        await api.post(`${config.RUTINAS_ENDPOINT}`, rutina);
         alert("Rutina creada con éxito");
       }
       
