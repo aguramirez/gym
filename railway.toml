@@ -7,7 +7,7 @@ restartPolicyType = "NEVER"
 healthcheckPath = "/health"
 healthcheckTimeout = 60        # segundos que espera cada intento (está bien)
 healthcheckInterval = 5        # tiempo entre reintentos
-healthcheckMaxRetries = 3      # reintenta solo 3 veces
+healthcheckMaxRetries = 8      # reintenta solo 8 veces
 
 [service]
 internal_port = 8080
