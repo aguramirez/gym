@@ -37,7 +37,7 @@ const RutinaEjercicioForm: React.FC<RutinaEjercicioFormProps> = ({ onSave }) => 
             <div>
                 <label>Sets</label>
                 <input
-                    type="number"
+                    type="text"
                     value={sets}
                     onChange={(e) => setSets(Number(e.target.value))}
                     required
@@ -46,7 +46,7 @@ const RutinaEjercicioForm: React.FC<RutinaEjercicioFormProps> = ({ onSave }) => 
             <div>
                 <label>Reps</label>
                 <input
-                    type="number"
+                    type="text"
                     value={reps}
                     onChange={(e) => setReps(Number(e.target.value))}
                     required
