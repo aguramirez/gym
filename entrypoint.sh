@@ -13,4 +13,7 @@ if [ ! -z "$MYSQL_URL" ]; then
 fi
 
 # Ejecutar la aplicación
-exec java -jar /app/app.jar --spring.profiles.active=prod --server.port=$PORT
+exec java -jar /app/app.jar \
+  --spring.profiles.active=prod \
+  --server.port=$PORT \
+  --server.address=0.0.0.0
