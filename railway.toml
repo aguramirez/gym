@@ -3,6 +3,11 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-restartPolicyType = "NEVER"
+restartPolicyType = "ON_FAILURE"
 healthcheckPath = "/health"
-healthcheckTimeout = 10
+healthcheckTimeout = 300
+startCommand = "/app/entrypoint.sh"
+
+[service]
+internal_port = 8080
+auto_deploy = true
