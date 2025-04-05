@@ -22,7 +22,7 @@ const Dashboard = () => {
     
     // Solo ADMIN y TRAINER pueden acceder al dashboard
     if (user.rol !== 'ADMIN' && user.rol !== 'TRAINER') {
-      navigate(`/cliente/${user.clienteId}`);
+      navigate(`/cliente/${user.id}`);
     }
   }, [navigate]);
 
