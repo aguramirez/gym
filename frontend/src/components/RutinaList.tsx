@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useRutinas, useEjercicios } from "../services/useDatos";
-import { FaPlus, FaEdit, FaTrash, FaEye, FaSpinner } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSpinner } from "react-icons/fa";
 import RutinaForm from "./RutinaForm";
 import "./rutinaList.css";
 import authService from "../services/authService"; // Importamos el servicio de autenticación
