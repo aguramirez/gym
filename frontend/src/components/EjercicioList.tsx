@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useEjercicios } from "../services/useDatos";
 import { FaPlus, FaTrash, FaEdit, FaSpinner } from "react-icons/fa";
 import EjercicioForm from "./EjercicioForm";
 import EjercicioView from "./EjercicioView";
-import authService from "../services/authService";
 import "./componentStyles.css";
+import api from "../services/api"; // Añadir esta importación
+import { config } from "../config/api.config"; // Añadir esta importación
 
 export interface Ejercicio {
   id?: number;
@@ -59,11 +59,7 @@ const EjercicioList = () => {
     
     try {
       setIsLoading(true);
-      const response = await axios.get<Ejercicio>(`http://localhost:8080/ejercicios/${ejercicioId}`, {
-        headers: {
-          'Authorization': authService.getToken()
-        }
-      });
+      const response = await api.get<Ejercicio>(`${config.EJERCICIOS_ENDPOINT}/${ejercicioId}`);
       setSelectedEjercicio(response.data);
       setShowViewModal(true);
     } catch (error) {
@@ -107,26 +103,22 @@ const EjercicioList = () => {
       
       // Si estamos en modo edición, actualizar
       if (editMode && selectedEjercicio?.id) {
-        await axios.put(
-          `http://localhost:8080/ejercicios/${selectedEjercicio.id}`, 
-          ejercicio,
-          {
-            headers: {
-              'Authorization': authService.getToken()
-            }
-          }
-        );
+        await api.put(`${config.EJERCICIOS_ENDPOINT}/${selectedEjercicio.id}`, ejercicio);
+        // await axios.put(
+        //   `http://localhost:8080/ejercicios/${selectedEjercicio.id}`, 
+        //   ejercicio,
+        //   {
+        //     headers: {
+        //       'Authorization': authService.getToken()
+        //     }
+        //   }
+        // );
         alert("Ejercicio actualizado con éxito");
       } else {
         // Si no, crear nuevo
-        await axios.post(
-          "http://localhost:8080/ejercicios", 
-          ejercicio,
-          {
-            headers: {
-              'Authorization': authService.getToken()
-            }
-          }
+        await api.post(
+          config.EJERCICIOS_ENDPOINT, 
+          ejercicio
         );
         alert("Ejercicio creado con éxito");
       }
@@ -165,11 +157,7 @@ const EjercicioList = () => {
     
     try {
       setIsLoading(true);
-      await axios.delete(`http://localhost:8080/ejercicios/${id}`, {
-        headers: {
-          'Authorization': authService.getToken()
-        }
-      });
+      await api.delete(`${config.EJERCICIOS_ENDPOINT}/${id}`);
       await fetchEjercicios();
       setShowViewModal(false); // Cerrar el modal de vista después de eliminar
       alert("Ejercicio eliminado con éxito");

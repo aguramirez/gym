@@ -5,6 +5,8 @@ import { FaPlus, FaEdit, FaTrash, FaEye, FaSpinner } from "react-icons/fa";
 import RutinaForm from "./RutinaForm";
 import "./rutinaList.css";
 import authService from "../services/authService"; // Importamos el servicio de autenticación
+import api from "../services/api"; // Añadir esta importación
+import { config } from "../config/api.config"; // Añadir esta importación
 
 interface Ejercicio {
   id: number;
@@ -65,7 +67,7 @@ const RutinaList = () => {
   const handleRowClick = async (rutinaId: number) => {
     try {
       setIsLoading(true);
-      const response = await axios.get(`http://localhost:8080/rutinas/${rutinaId}`);
+      const response = await api.get(`${config.RUTINAS_ENDPOINT}/${rutinaId}`);
       setSelectedRutina(response.data);
       setShowViewModal(true);
     } catch (error) {
@@ -109,7 +111,7 @@ const RutinaList = () => {
     
     try {
       setIsLoading(true);
-      await axios.delete(`http://localhost:8080/rutinas/${id}`);
+      await api.delete(`${config.RUTINAS_ENDPOINT}/${id}`);
       await fetchRutinas();
       setShowViewModal(false); // Cerrar el modal de vista después de eliminar
       alert("Rutina eliminada con éxito");
@@ -142,10 +144,10 @@ const RutinaList = () => {
       
       // Crear o actualizar rutina
       if (editMode && selectedRutina?.id) {
-        await axios.put(`http://localhost:8080/rutinas/${selectedRutina.id}`, rutina);
+        await api.put(`${config.RUTINAS_ENDPOINT}/${selectedRutina.id}`, rutina);
         alert("Rutina actualizada con éxito");
       } else {
-        await axios.post("http://localhost:8080/rutinas", rutina);
+        await api.post(`${config.RUTINAS_ENDPOINT}/rutinas`, rutina);
         alert("Rutina creada con éxito");
       }
       

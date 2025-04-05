@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { useClientes, useRutinas } from "../services/useDatos";
 import { FaUserPlus, FaTrash, FaEdit, FaSpinner } from "react-icons/fa";
 import { MdAssignmentAdd } from "react-icons/md";
 import ClienteForm from "./ClienteForm";
 import "./clienteList.css";
+import api from "../services/api"; // Añadir esta importación
+import { config } from "../config/api.config"; // Añadir esta importación
 
 interface Cliente {
   id: number;
@@ -81,8 +82,8 @@ const ClienteList = () => {
       // Intentemos directamente con el endpoint de clientes/rutinas que parece estar funcionando
       try {
         console.log(`Intentando obtener desde /clientes/${clienteId}/rutinas`);
-        const clienteResponse = await axios.get<any>(
-          `http://localhost:8080/clientes/${clienteId}/rutinas`
+        const clienteResponse = await api.get<any>(
+          `${config.CLIENTES_ENDPOINT}/${clienteId}/rutinas`
         );
 
         if (Array.isArray(clienteResponse.data)) {
@@ -113,8 +114,8 @@ const ClienteList = () => {
         // Intentamos con el segundo endpoint como fallback
         try {
           console.log(`Intentando obtener desde /cliente-rutinas/rutinas?clienteId=${clienteId}`);
-          const response = await axios.get<ClienteRutina[]>(
-            `http://localhost:8080/cliente-rutinas/rutinas`,
+          const response = await api.get<ClienteRutina[]>(
+            `${config.CLIENTE_RUTINAS_ENDPOINT}/rutinas`,
             { params: { clienteId } }
           );
 
@@ -211,9 +212,9 @@ const ClienteList = () => {
 
       // Si hay ID, es una actualización, si no, es creación
       if (id) {
-        await axios.put(`http://localhost:8080/clientes/${id}`, cliente);
+        await api.put(`${config.CLIENTES_ENDPOINT}/${id}`, cliente);
       } else {
-        await axios.post("http://localhost:8080/clientes", {
+        await api.post(`${config.CLIENTES_ENDPOINT}`, {
           ...cliente,
           rol: cliente.rol || "USER" // Rol predeterminado
         });
@@ -236,7 +237,7 @@ const ClienteList = () => {
 
     try {
       setIsLoading(true);
-      await axios.delete(`http://localhost:8080/clientes/${id}`);
+      await api.delete(`${config.CLIENTES_ENDPOINT}/${id}`);
       await fetchClientes();
       setShowDetailModal(false); // Cerrar el modal de detalle tras eliminar
       alert("Cliente eliminado exitosamente");
@@ -266,7 +267,7 @@ const ClienteList = () => {
 
       console.log(`Asignando rutina ${rutinaId} al cliente ${selectedCliente.id}`);
 
-      await axios.post("http://localhost:8080/cliente-rutinas/asignar", null, {
+      await api.post(`${config.CLIENTE_RUTINAS_ENDPOINT}/asignar`, null, {
         params: {
           clienteId: selectedCliente.id,
           rutinaId: rutinaId,
@@ -325,7 +326,7 @@ const ClienteList = () => {
 
       console.log(`Desasignando rutina ${rutinaId} del cliente ${selectedCliente.id}`);
 
-      await axios.delete("http://localhost:8080/cliente-rutinas/desasignar", {
+      await api.delete(`${config.CLIENTE_RUTINAS_ENDPOINT}/desasignar`, {
         params: {
           clienteId: selectedCliente.id,
           rutinaId: rutinaId,

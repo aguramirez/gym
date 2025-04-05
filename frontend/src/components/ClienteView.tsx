@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
 import { FaSignOutAlt, FaUser, FaDumbbell, FaAngleDown, FaAngleUp, FaEdit, FaSave, FaTimes, FaExternalLinkAlt } from "react-icons/fa";
 import { BiLoaderAlt } from "react-icons/bi";
 import authService from "../services/authService";
 import LoadingScreen from "./LoadingScreen";
 import "./clienteView.css";
+import api from "../services/api"; // Añadir esta importación
+import { config } from "../config/api.config"; // Añadir esta importación
 
 // Tipos de datos
 interface Ejercicio {
@@ -140,14 +141,9 @@ const ClienteView = () => {
         try {
             setIsLoading(true);
             // Modificar esta línea para incluir el token en el header manualmente
-            const response = await axios.get<Cliente>(
-                `http://localhost:8080/clientes/${clienteId}`,
-                {
-                    headers: {
-                        'Authorization': authService.getToken()
-                    }
-                }
-            );
+            const response = await api.get<Cliente>(
+                `${config.CLIENTES_ENDPOINT}/${clienteId}`
+              );
             setCliente(response.data);
             setError(null);
             
@@ -165,13 +161,10 @@ const ClienteView = () => {
         if (isNaN(clienteId)) return;
         
         try {
-            const response = await axios.get<ClienteRutina[]>(
-                `http://localhost:8080/cliente-rutinas/rutinas`,
+            const response = await api.get<ClienteRutina[]>(
+                `${config.CLIENTE_RUTINAS_ENDPOINT}/rutinas`,
                 { 
-                    params: { clienteId },
-                    headers: {
-                        'Authorization': authService.getToken()
-                    }
+                    params: { clienteId }
                 }
             );
             
@@ -251,14 +244,9 @@ const ClienteView = () => {
 
         setIsSaving(true);
         try {
-            await axios.put(
-                `http://localhost:8080/cliente-rutinas/ejercicios/${ejercicioId}/notas`,
-                { notas: notasText },
-                {
-                    headers: {
-                        'Authorization': authService.getToken()
-                    }
-                }
+            await api.put(
+                `${config.CLIENTE_RUTINAS_ENDPOINT}/ejercicios/${ejercicioId}/notas`,
+                { notas: notasText }
             );
 
             // Actualizar estado local
