@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import useDatos from "../services/useDatos";
-import { FaUserPlus, FaTrash, FaEdit, FaSpinner, FaSync } from "react-icons/fa";
+import { useClientes, useRutinas } from "../services/useDatos";
+import { FaUserPlus, FaTrash, FaEdit, FaSpinner } from "react-icons/fa";
 import { MdAssignmentAdd } from "react-icons/md";
 import ClienteForm from "./ClienteForm";
 import "./clienteList.css";
@@ -34,11 +34,8 @@ const isProtectedUser = (cliente: Cliente): boolean => {
 };
 
 const ClienteList = () => {
-  const { clientes, rutinas, fetchClientes } = useDatos() as {
-    clientes: Cliente[] | null;
-    fetchClientes: () => Promise<void>;
-    rutinas: Rutina[];
-  };
+  const { clientes, fetchClientes } = useClientes();
+  const { rutinas } = useRutinas();
 
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);

@@ -41,10 +41,12 @@ const authService = {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify({
           id: response.data.clienteId,
+          clienteId: response.data.clienteId,
           nombre: response.data.nombre,
           rol: response.data.rol
         }));
       }
+      console.log(response.data)
       return response.data;
     } catch (error) {
       console.error('Error de login:', error);
